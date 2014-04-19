@@ -18,6 +18,7 @@ the concept of an 'interval function' (or IFUNC) as described by
 influential music theorist David Lewin in his classic Generalized
 Musical Intervals and Transformations
 
+### Additional notes
 The following code is being used to provide the computational
 underpinning for research to be published soon in a scholarly
 music theory journal and, as such, is not quite ready for public
@@ -35,4 +36,20 @@ While there is a very rough attempt to group functions that
 belong together in the same sections, consider a more
 standardized approach to semi-colon commenting. for some reason,
 hash-pipe commenting blocks seems to be glitchy in Aquamacs, but is
-otherwise quite useful
+otherwise quite useful.
+
+#### Further comments on coding
+
+Begins by loading various pitch-class sets, and then initializing
+globals that will hold pairs of the various pitch-class sets as laid
+out according to the Forte-system. The list is, unsurprisingly, the
+primary data structure for pitch classes rather than strings or
+vectors with no whitespace, largely because of Lispy propensities. The
+data could probably be re-formatted if performance ever became an
+issue.
+
+As it is, compiling this whole file populates the necessary
+databases in decent enough time, despite reliance on inefficient data
+structures and some inevitably sloppy coding (still not bad for my
+first big Lisp program, I must say).
+

@@ -1,15 +1,4 @@
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;begin;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;; initialize globals that hold pitch-class sets as laid out
-;;; according to the Forte-system. Uses lists of pitch classes rather
-;;; than strings or vectors with no whitespace, largely because of Lispy
-;;; propensities. Could probably be re-formatted if performance 
-;;; ever became an issue. As it is, compiling this whole file populates 
-;;; the necessary databases in decent enough time, despite reliance
-;;; on inefficient data structures and some inevitably sloppy coding (still
-;;; not bad for my first big Lisp program, I must say).
-
 ;;tn-types
 
 ;; temporary fix for loading data as a file
