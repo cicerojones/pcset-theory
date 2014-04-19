@@ -38,7 +38,7 @@
 ;;tn-types
 
 ;; temporary fix for loading data as a file
-(load "/Users/a/Documents/starting-directory/projects/T3L-programming/artistic\ language\ related/music/Lisp/interval-function\ related/imset-independent-project-files-for-pima/refactoring-data.lisp")
+(load "/Users/a/pcset-theory/refactoring-data.lisp")
 
 ;; the massive concatenation of all 215 (?) Tn set-types
 (defvar *tn-types* 
