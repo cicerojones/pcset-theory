@@ -2,21 +2,25 @@ pcset-theory
 ============
 
 These files contain Lisp code that works with the pitch-class sets of
-post-tonal music theory. Specifically, imset-code-only-functions
-provides a "imset-decision-maker," which is roughly described in
+post-tonal music theory. Specifically, *imset-code-only-functions*
+provides an "imset-decision-maker," which is roughly described in
 various pieces of documentation throughout the files.
 
 The overall project is in rough form, but is in the process of being
 refactored into more logical pieces and documented more
 conventionally.
 
+Ultimately, an interactive front-end, probably to be used via PWGL or
+a similar graphical environment, allowing the user to hear and explore
+the relationships would be ideal.
+
 ## General Explanation
 A suite of functions for dealing with a new, relatively-esoteric
 concept in the relatively esoteric world of post-tonal music
 theory: the interval multiset (or imset), which is derived from
 the concept of an 'interval function' (or IFUNC) as described by
-influential music theorist David Lewin in his classic Generalized
-Musical Intervals and Transformations
+influential music theorist David Lewin in his classic *Generalized
+Musical Intervals and Transformations*.
 
 ### Additional notes
 The following code is being used to provide the computational
