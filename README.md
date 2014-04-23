@@ -42,7 +42,24 @@ standardized approach to semi-colon commenting. for some reason,
 hash-pipe commenting blocks seems to be glitchy in Aquamacs, but is
 otherwise quite useful.
 
-#### Further comments on coding
+## Explanation of Use
+
+For now, the top-level function ```imset-decision-maker``` can be
+called with any two sets of any cardinality and the user will receive
+the a multiset. This multiset represents the prime form of the
+_interval multiset_ formed by applying Lewin's interval function (or
+IFUNC) to the given sets.
+
+Examples to follow.
+
+### Existing data
+
+Currently, the data for all combinations of a vast number of sets
+already exists in a static form elsewhere. It will eventually all be
+posted, though further analysis remains to be done to tease out
+interesting or noteworthy patterns.
+
+### Further comments on coding
 
 Begins by loading various pitch-class sets, and then initializing
 globals that will hold pairs of the various pitch-class sets as laid
