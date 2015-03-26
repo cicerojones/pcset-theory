@@ -277,7 +277,7 @@ conjoining every two elements"
 ;; (defun help-view-imsets (paired-list) 
 ;;   (format t "~{~a~%~{~{~28a ~}~%~}~}" (list paired-list (24create paired-list))))
 ;;
-;; neatly print out trichords with INFUNCS
+;; neatly print out trichords with IFUNCS
 ;; may fail for other cardinalities to print 
 ;; with good column aligning because of the ~28
 ;; should be adjusted to use global of choice
