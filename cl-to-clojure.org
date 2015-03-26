@@ -23,34 +23,32 @@
 
 #+RESULTS:
 | 4 | 5 | 6 |
-
-
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun Tn1-11 (n pcset)     ;expects an argument of n=12
     (cond ((= n -1) ())
 	  (t (cons (list+ n pcset)
 		   (Tn1-11 (- n 1) pcset)))))
  #+END_SRC
-
-
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun mod12 (lst)
   (mapcar #'(lambda (x) (mod x 12)) lst))
  #+END_SRC
-
-
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun mod12-all (lst-of-lsts)
   (mapcar #'mod12 lst-of-lsts))
  #+END_SRC
 
-
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun TnI-all (lol-of-pcsets)
  (mapcar #'(lambda (x) (reverse (mod12-all (Tn1-11 11 x)))) lol-of-pcsets))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun flatten (x)
   (labels 
@@ -83,6 +81,8 @@
  ;; have to explicitly pass in '11', or so you can call 
  ;; REVERSE at the end? Probably possible to write it more simply.
 
+
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun counting (lst-of-12ints)
   "Use COUNT to find the number of occurrences of each
@@ -96,6 +96,7 @@
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun repeating (num-element1 num-element2)
   (cond ((= 0 num-element1) ())
@@ -103,6 +104,8 @@
 		 (repeating (- num-element1 1) num-element2)))))
  #+END_SRC
 
+
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun 12-profile (vector)
   (list (repeating (nth 0 vector) 0)
@@ -120,12 +123,14 @@
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun clean-profile (single-vector)
   (flatten (remove-if #'null (12-profile single-vector))))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun de-nestC (x)
   (labels ((rec (x acc)
@@ -136,6 +141,7 @@
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-up (pcset1 lst-of-pcsets)
   (cond ((null lst-of-pcsets) ())
@@ -145,6 +151,7 @@
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun make-pairs-from-list (lst)
   "turn a list of anythings into pairs of those things, simply
@@ -155,6 +162,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun jack-b (listA listA-prime)
   (cond ((null listA-prime) ())
@@ -165,11 +173,13 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun last1 (lst) (car (last lst)))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun jack-rec (listA listA-prime)
       (cond ((null listA) ())
@@ -182,6 +192,7 @@ conjoining every two elements"
 
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-up-Tn-equivalent-Ys-with-X (pcset1 pcset2)
   (set-up pcset1 (car (tni-all (list pcset2)))))
@@ -192,6 +203,7 @@ conjoining every two elements"
 
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun pc-compari (n1 n2)
   (cond ((<= n1 n2)
@@ -202,6 +214,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun rec-do-pc-compari (lst1 lst2)
   (labels ((rec (x1 y1)
@@ -214,18 +227,21 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-lewin-vector (set1 set2)
   (counting (flatten (rec-do-pc-compari set1 set2))))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-straus-profile (set1 set2)
   (clean-profile (create-lewin-vector set1 set2)))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12-straus-profiles (set1 set2)
   (let ((a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))))
@@ -235,6 +251,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12-lewin-vectors (set1 set2)
   (let ((a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))))
@@ -244,12 +261,14 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun createA-lewin-vector (paired-set)
   (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-24-lewin-vectors (paired-list)
   (let* ((a (make-pairs-from-list 
@@ -261,12 +280,14 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-Astraus-profile (paired-list)
   (clean-profile (createA-lewin-vector paired-list)))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12A-straus-profiles (paired-list)
   (let ((a (make-pairs-from-list 
@@ -276,6 +297,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun looking (mset)
   (cond ((null mset) ())
@@ -284,6 +306,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun comparing (mset-list)
   (let ((canon (mapcar #'list-to-integer (mapcar #'looking mset-list))))
@@ -291,6 +314,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun locating (mset-list)
   (let ((chart (comparing mset-list)))
@@ -298,6 +322,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun locate (x lat)
   (let ((newlat (reverse lat)))
@@ -311,6 +336,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun rotate (list count)
   (if (minusp count)
@@ -319,6 +345,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun my-rotate (lst)
   (let ((n (length lst)))
@@ -331,12 +358,14 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun all-rotations (lst)
   (butlast (de-nestC (my-rotate lst))))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun mod12math (less more)
   (cond ((<= less more) (- more less))
@@ -344,6 +373,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun primer (ordered-set)
   (cond ((null ordered-set) ())
@@ -352,6 +382,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun prime-vector (ordered-set)
   (let ((basic-vector (primer ordered-set)))
@@ -359,12 +390,14 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun wrap-vectors (ordered-set)
   (mapcar #'prime-vector (all-rotations ordered-set)))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun list-to-integer (lst-of-ints)
   (let ((high-exp (length lst-of-ints)))
@@ -377,6 +410,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun find-prime-form-from-list (ordered-pcset)
   (let* ((a (all-rotations ordered-pcset))
@@ -386,6 +420,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-to-zero (ordered-pcset)
   (let ((n (car ordered-pcset)))
@@ -396,24 +431,28 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun invert-mod12-pcset (pcset)
  (sort (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))) #'<))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun Ainvert-mod12-pcset (pcset)
  (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun find-set-inversion (pcset)
   (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-decision (pcset)
   (let ((a (set-to-zero (find-prime-form-from-list pcset))))
@@ -421,6 +460,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-prime (pcset)
   (let ((a (forte-decision pcset)))
@@ -430,6 +470,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-primeA (pcset)
   (let ((a (forte-decision pcset)))
@@ -437,6 +478,7 @@ conjoining every two elements"
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun another-forte (setx sety)
   (let ((a setx) (b sety))
@@ -465,23 +507,28 @@ conjoining every two elements"
  ;; them? quote unquote.
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-primeA (mset)
  (forte-primeA (remove-duplicates mset)))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-prime (mset)
  (forte-prime (remove-duplicates mset)))
  #+END_SRC
 
 
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-decision (mset)
   (forte-decision (remove-duplicates mset)))
  #+END_SRC
 
+
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun imset-decision-maker (paired-list)
   (let* (
@@ -560,6 +607,8 @@ conjoining every two elements"
 	(locating j))))
  #+END_SRC
 
+
+** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun map-locate (loli)
   (let ((full-list loli))
