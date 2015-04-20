@@ -1,4 +1,4 @@
-* converting common lisp functions to clojure
+* converting basic common lisp functions to clojure
 ** basic "list adder" function
 *** common lisp
 #+BEGIN_SRC lisp :session cl-to-cloj
@@ -294,7 +294,6 @@
 
 
 ** de-nesting to one level
-
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun de-nestC (x)
@@ -319,6 +318,17 @@
  | 0 | 2 | 5 | 7 |
 
 *** clj
+**** concat
+#+BEGIN_SRC clojure :results output
+(println (concat '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7))))))
+#+END_SRC
+
+#+RESULTS:
+: ((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7))))
+
+**** understanding recursive clojure definition
+
+***** de-nestc code
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn de-nestc [x]
   (letfn [(denester [inner-x acc]
@@ -328,14 +338,83 @@
                     :else (denester (first coll) (denester (rest coll) acc)))))]
     (denester x ())))
 
-(de-nestc '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7)))))
+
 
 #+END_SRC
 
 #+RESULTS:
 : #'post_tonal_overtone.core/de-nestc((0 1) (0 3) (0 4) (0 4 5) (0 4 6) (0 1 2 4) (0 1 3 5) (0 1 4 6) (0 2 5 7))
 
-(
+***** basic example with pure lists--as expected from cl
+#+BEGIN_SRC clojure
+(de-nestc '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7)))))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 |   |   |
+| 0 | 3 |   |   |
+| 0 | 4 |   |   |
+| 0 | 4 | 5 |   |
+| 0 | 4 | 6 |   |
+| 0 | 1 | 2 | 4 |
+| 0 | 1 | 3 | 5 |
+| 0 | 1 | 4 | 6 |
+| 0 | 2 | 5 | 7 | 
+
+***** basic example with lists of vectors--still as expected from cl
+#+BEGIN_SRC clojure
+(de-nestc '(([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64])))
+#+END_SRC  
+
+#+RESULTS:
+| 24 | 25 | 28 |
+| 24 | 25 | 40 |
+| 24 | 25 | 52 |
+| 24 | 25 | 64 |
+| 24 | 37 | 28 |
+| 24 | 37 | 40 |
+| 24 | 37 | 52 |
+| 24 | 37 | 64 |
+| 24 | 49 | 28 |
+| 24 | 49 | 40 |
+| 24 | 49 | 52 |
+| 24 | 49 | 64 |
+| 24 | 61 | 28 |
+| 24 | 61 | 40 |
+| 24 | 61 | 52 |
+| 24 | 61 | 64 |
+***** examining a data structure referred to by a var
+#+BEGIN_SRC clojure :results output
+(println (first trip014))
+#+END_SRC
+
+#+RESULTS:
+: (([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64]))
+***** huh? de-nest wraps a list around the
+#+BEGIN_SRC clojure :results output
+(println (de-nestc (first trip014)))
+#+END_SRC
+
+#+RESULTS:
+: ((([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64])))
+***** concat needs to be applied
+#+BEGIN_SRC clojure :results output
+(println (apply concat (first trip014)))
+#+END_SRC
+
+#+RESULTS:
+: ([24 25 28] [24 25 40] [24 25 52] [24 25 64] [24 37 28] [24 37 40] [24 37 52] [24 37 64] [24 49 28] [24 49 40] [24 49 52] [24 49 64] [24 61 28] [24 61 40] [24 61 52] [24 61 64])
+
+#+RESULTS:
+
+#+BEGIN_SRC clojure
+(de-nestc '(([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64])))
+#+END_SRC
+*** 
+* converting complex common lisp functions to clojure
+** 
+sstrpp
+
 ** set-up pairs of pc-sets
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -386,7 +465,7 @@ backwards version because of cons-ing
 #+END_SRC
 
 #+RESULTS:
-: #'post_tonal_overtone.core/set-up((0 1 2) (0 1 2) (0 4) (0 1 2) (0 1 2 4 6) (0 1 2))
+: #'post_tonal_overtone.core/set-up((0 1 2) (0 1 2 4 6) (0 1 2) (0 4) (0 1 2) (0 1 2))
 
 ** 
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -397,7 +476,6 @@ conjoining every two elements"
 	(t (cons (list (first lst) (second lst))
 		 (make-pairs-from-list (nthcdr 2 lst))))))
  #+END_SRC
-
 
 ** 
  #+BEGIN_SRC lisp :session cl-to-cloj
