@@ -87,7 +87,6 @@
 | 12 | 16 | 19 |
 
 ** mod12 across a list
-
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun mod12 (lst)
@@ -412,9 +411,6 @@
 #+END_SRC
 *** 
 * converting complex common lisp functions to clojure
-** 
-sstrpp
-
 ** set-up pairs of pc-sets
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -467,7 +463,9 @@ backwards version because of cons-ing
 #+RESULTS:
 : #'post_tonal_overtone.core/set-up((0 1 2) (0 1 2 4 6) (0 1 2) (0 4) (0 1 2) (0 1 2))
 
-** 
+** make pairs = partition
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun make-pairs-from-list (lst)
   "turn a list of anythings into pairs of those things, simply
@@ -475,9 +473,34 @@ conjoining every two elements"
   (cond ((null lst) ())
 	(t (cons (list (first lst) (second lst))
 		 (make-pairs-from-list (nthcdr 2 lst))))))
+
+(make-pairs-from-list '(0 1 2 3 4 5 6 7 8 9))
  #+END_SRC
 
-** 
+ #+RESULTS:
+ | 0 | 1 |
+ | 2 | 3 |
+ | 4 | 5 |
+ | 6 | 7 |
+ | 8 | 9 |
+
+*** clj
+
+#+BEGIN_SRC clojure
+(partition 2 '(0 1 2 3 4 5 6 7 8 9))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 |
+| 2 | 3 |
+| 4 | 5 |
+| 6 | 7 |
+| 8 | 9 |
+
+** join up the first element from a given set with the rest of sets--jack-b
+needs a better name!
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun jack-b (listA listA-prime)
   (cond ((null listA-prime) ())
@@ -485,16 +508,74 @@ conjoining every two elements"
 	    (list (car listA)
 		  (car listA-prime))
 	    (jack-b listA (cdr listA-prime))))))
+
+(jack-b '(0 1) '((0 1) (0 3) (0 1 4) (0 1 5) (0 1) (0 3)))
  #+END_SRC
 
+ #+RESULTS:
+ | 0 | (0 1)   |
+ | 0 | (0 3)   |
+ | 0 | (0 1 4) |
+ | 0 | (0 1 5) |
+ | 0 | (0 1)   |
+ | 0 | (0 3)   |
 
-** 
+*** clj
+
+watch what happens when you switch up cons and conj here! Comedy ensues.
+
+#+BEGIN_SRC clojure
+(defn jack-b [lst1 lst2]
+(loop [l1 lst1
+       l2 lst2
+       acc ()]
+  (if (empty? l2) 
+      acc
+      (recur l1 (rest l2) (cons (list (first l1) (first l2)) acc)))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/jack-b
+
+f#+BEGIN_SRC clojure
+
+(jack-b '(0 1) '((0 1) (0 3) (0 1 4) (0 1 5) (0 1) (0 3)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | (0 3)   |
+| 0 | (0 1)   |
+| 0 | (0 1 5) |
+| 0 | (0 1 4) |
+| 0 | (0 3)   |
+| 0 | (0 1)   |
+
+** last1--a Graham utility
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun last1 (lst) (car (last lst)))
+
+(last1 '((0 1)))
  #+END_SRC
 
+ #+RESULTS:
+ | 0 | 1 |
+
+*** clj
+#+BEGIN_SRC clojure
+(last '((0 1)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 |
 
 ** 
+
+*** cl
+this guy does a particular kind of combinatoric setup that is
+important for generating unique combinations of two chords.
+That is, it will produce '((0 1) (0 2)) but not '((0 2) (0 1))
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun jack-rec (listA listA-prime)
       (cond ((null listA) ())
@@ -502,11 +583,32 @@ conjoining every two elements"
                           (cond ((null listA) ())
                                 (t (jack-b an-x a-y)))))
                  (list (rec listA listA-prime) (jack-rec (cdr listA) (cdr listA-prime)))))))
+
+
  #+END_SRC
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(jack-rec '(0 1) '((0 1) (0 3) (0 1 4) (0 1 5) (0 1) (0 3)))
+#+END_SRC
 
+#+RESULTS:
+| (0 (0 1))                                               | (0 (0 3)) | (0 (0 1 4)) | (0 (0 1 5)) | (0 (0 1)) | (0 (0 3)) |
+| ((1 (0 3)) (1 (0 1 4)) (1 (0 1 5)) (1 (0 1)) (1 (0 3))) | NIL       |             |             |           |           |
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(make-pairs-from-list (de-nestc (jack-rec '((0 1) (0 2) (0 3)) '((0 1) (0 2) (0 3)))))
+#+END_SRC
 
+#+RESULTS:
+| (0 1) | (0 1) |
+| (0 1) | (0 2) |
+| (0 1) | (0 3) |
+| (0 2) | (0 2) |
+| (0 2) | (0 3) |
+| (0 3) | (0 3) |
+| (NIL) | NIL   |
+
+*** clj
 ** 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-up-Tn-equivalent-Ys-with-X (pcset1 pcset2)
