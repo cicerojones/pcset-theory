@@ -11,7 +11,7 @@
 #+RESULTS:
 | 12 | 16 | 19 |
 
-*** clojure
+*** clojure								:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn list+ [n lst]
   (map (fn [x] (+ n x)) lst))
@@ -51,7 +51,7 @@
  |  2 |  6 |  9 |
  |  1 |  5 |  8 |
  |  0 |  4 |  7 |
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn Tn1-11 [pcset]
   (loop [n 12
@@ -98,7 +98,7 @@
  #+RESULTS:
  | 0 | 4 | 7 |
 
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn mod12 [lst]
 (map #(mod % 12) lst))
@@ -123,7 +123,7 @@
  | 0 | 4 | 7 |
  | 0 | 4 | 7 |
 
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn mod12-all [lst-of-lsts]
 (map mod12 lst-of-lsts))
@@ -148,7 +148,7 @@
  | (0 1 2) | (1 2 3) | (2 3 4) | (3 4 5) | (4 5 6)  | (5 6 7)  | (6 7 8) | (7 8 9)  | (8 9 10) | (9 10 11) | (10 11 0) | (11 0 1) |
  | (0 3 6) | (1 4 7) | (2 5 8) | (3 6 9) | (4 7 10) | (5 8 11) | (6 9 0) | (7 10 1) | (8 11 2) | (9 0 3)   | (10 1 4)  | (11 2 5) |
 
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn TnI-all [lol-of-pcsets]
 (map #(mod12-all (Tn1-11 %)) lol-of-pcsets))
@@ -224,7 +224,7 @@
 #+RESULTS:
 : 2
 
-*** clj--frequencies
+*** clj--frequencies							:clj:
 **** produces a map??
 #+BEGIN_SRC clojure :session cl-to-cloj :results output
 (println (frequencies [3 1 2 0 2 4 0 0 0 0 0 0]))
@@ -233,7 +233,7 @@
 #+RESULTS:
 : {3 1, 1 1, 2 2, 0 7, 4 1}
 
-**** clj--dealing with frequencies
+**** clj--dealing with frequencies					:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (let [v [3 1 2 0 2 4 0 0 0 0 0 0]]
                             (for [n (range 12)]
@@ -243,7 +243,7 @@
 #+RESULTS:
 | 7 | 1 | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-*** clj--counting proper
+*** clj--counting proper						:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn counting [v]
   (for [n (range 12)]
@@ -274,7 +274,7 @@
  #+RESULTS:
  | 6 | 6 | 6 | 6 |
 
-*** clj--repeat is a built-in for populating a list
+*** clj--repeat is a built-in for populating a list			:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (repeat 4 6)
 #+END_SRC
@@ -305,7 +305,7 @@
  #+RESULTS:
  | (0 0 0 0 0 0 0) | (1) | (2 2) | (3) | (4) | NIL | NIL | NIL | NIL | NIL | NIL | NIL |
 
-*** clj
+*** clj									:clj:
 **** contains? is best on maps, not lists or vectors
 http://clojuredocs.org/clojure.core/contains_q
 
@@ -420,7 +420,7 @@ I.e. create-straus-profile is:
  #+RESULTS:
  | 1 | 2 | 3 | 3 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 7 | 7 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 |
 
-*** clj?--create straus profile directly
+*** clj?--create straus profile directly				:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn clean-profile [single-vector]
 (sort (flatten (rec-do-pc-compari ))))
@@ -450,7 +450,7 @@ I.e. create-straus-profile is:
  | 0 | 1 | 4 | 6 |
  | 0 | 2 | 5 | 7 |
 
-*** clj--far more complicated; whence apply concat?
+*** clj--far more complicated; whence apply concat?			:clj:
 **** concat--doesn't make much sense by itself...
 #+BEGIN_SRC clojure :results output
 (println (concat '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7))))))
@@ -525,7 +525,7 @@ I.e. create-straus-profile is:
 #+BEGIN_SRC clojure
 (de-nestc '(([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64])))
 #+END_SRC
-*** clj--de-nestc code
+*** clj--de-nestc code							:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn de-nestc [x]
   (letfn [(denester [inner-x acc]
@@ -566,7 +566,7 @@ I.e. create-straus-profile is:
  | 0 | 4 |   |   |   |
  | 0 | 1 | 2 |   |   |
  | 0 | 1 | 2 | 4 | 6 |
-*** clj
+*** clj									:clj:
 backwards version because of cons-ing
 #+BEGIN_SRC clojure
 (defn set-up [pcset1 lst-of-pcsets]
@@ -620,7 +620,7 @@ conjoining every two elements"
  | 6 | 7 |
  | 8 | 9 |
 
-*** clj
+*** clj									:clj:
 
 #+BEGIN_SRC clojure
 (partition 2 '(0 1 2 3 4 5 6 7 8 9))
@@ -665,7 +665,7 @@ needs a better name!
  | 0 | (0 1)   |
  | 0 | (0 3)   |
 
-*** clj
+*** clj									:clj:
 
 watch what happens when you switch up cons and conj here! Comedy ensues.
 
@@ -707,7 +707,7 @@ f#+BEGIN_SRC clojure
  #+RESULTS:
  | 0 | 1 |
 
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure
 (last '((0 1)))
 #+END_SRC
@@ -766,7 +766,7 @@ combinatorial function that did combinations WITH replacement.
 | (0 3) | (0 3) |
 | (NIL) | NIL   |
 
-*** clj--jack-rec not necessary? 
+*** clj--jack-rec not necessary?					:clj:
 If all jack-rec is required to do is participate in constructing pairs
 of pairs, then...one must ask the question: is it possible to
 construct those some other way?
@@ -785,7 +785,7 @@ construct those some other way?
 #+END_SRC
 
 #+RESULTS:
-*** clj--long process for producing combinations
+*** clj--long process for producing combinations			:clj:
 #+BEGIN_SRC clojure
 (defn help-make-pairs [[head & tail]]
 (letfn [(rec [inner-tail]
@@ -872,7 +872,7 @@ Produces pairs of set1 and transposed versions of set2
 |  0 |  1 |    |
 | 11 |  0 |  2 |
 
-*** clj
+*** clj									:clj:
 **** clj prepare-set-up
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn prepare-set-up-tn-equivalent-Ys-with-x [pcset1 pcset2]
@@ -953,7 +953,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+RESULTS:
 : 1
 
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn pc-compari [n1 n2]
   (cond (<= n1 n2) (cond (= n1 n2) 0
@@ -1006,7 +1006,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 1 |  0 | 11 |
 | 3 |  2 |  1 |
 
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn rec-do-pc-compari [lst1 lst2]
   (letfn [(rec [l1 l2]
@@ -1061,7 +1061,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+RESULTS:
 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
-*** clj
+*** clj									:clj:
  #+BEGIN_SRC clojure :session cl-to-cloj
 (defn create-lewin-vector [set1 set2]
   (counting (flatten (rec-do-pc-compari set1 set2))))
@@ -1087,7 +1087,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+RESULTS:
  : CREATE-STRAUS-PROFILE
 
-*** clj
+*** clj									:clj:
 
 
 
@@ -1145,7 +1145,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 0 | 9 | 10 | 11 |
 | 0 | 1 | 10 | 11 |
 
-*** clj--make-pairs-from list redunant
+*** clj--make-pairs-from list redunant					:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn create-12-straus-profiles [set1 set2]
   (let [a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))]
@@ -1377,7 +1377,7 @@ location? Some peculiarity of where it is called?
 
 #+RESULTS:
 | 10 | 3 | 5 |
-*** clj--can use keep-indexed
+*** clj--can use keep-indexed						:clj:
 taken from SO discussions about indices and finding
 http://stackoverflow.com/questions/4830900/how-do-i-find-the-index-of-an-item-in-a-vector
 http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-predicate-in-clojure
@@ -1403,6 +1403,7 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
 * prime-form utilities
 ** rotate
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun rotate (list count)
   (if (minusp count)
@@ -1427,7 +1428,7 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
 #+RESULTS:
 | 2 | 11 | 0 | 1 |
-
+*** the calling dependency list
 1. rotate
 2. my-rotate
 3. all-rotations
@@ -1442,6 +1443,7 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
 #+END_SRC
 ** my-rotate
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun my-rotate (lst)
   (let ((n (length lst)))
@@ -1464,7 +1466,8 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 |          0 |                             1 | 2 | 11 |
 | (11 0 1 2) | ((2 11 0 1) ((1 2 11 0) NIL)) |   |    |
 
-** all-rotations
+** all-rotations--jump in with overtone
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun all-rotations (lst)
   (butlast (de-nestC (my-rotate lst))))
@@ -1483,8 +1486,42 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 | 11 |  0 |  1 |  2 |
 |  2 | 11 |  0 |  1 |
 |  1 |  2 | 11 |  0 |
+*** clj									:clj:
+Should I be relying on an external library like this?
 
-** mod12math--replicates other mod12 arithmetic??
+Also, the for loop using rotate will return in the reverse order unless
+acted upon. Will this matter? I don't think so, but consider building
+the above functions in clojure as well.
+#+BEGIN_SRC clojure :session cl-to-cloj
+(overtone.core/rotate 1 [0 1 3 4])
+#+END_SRC
+
+#+RESULTS:
+| 1 | 3 | 4 | 0 |
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn all-rotations [lst]
+(let [len (count lst)]
+(for [n (range len)]
+(overtone.core/rotate n lst))) )
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/all-rotations
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(all-rotations '(0 1 2 11))
+#+END_SRC
+
+#+RESULTS:
+|  0 |  1 |  2 | 11 |
+|  1 |  2 | 11 |  0 |
+|  2 | 11 |  0 |  1 |
+| 11 |  0 |  1 |  2 |
+
+** mod12math--redundant? called only by primer
+*** cl
+
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun mod12math (less more)
   (cond ((<= less more) (- more less))
@@ -1508,7 +1545,36 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 #+RESULTS:
 : 3
 
-** primer
+#+BEGIN_SRC lisp :session cl-to-cloj
+(mod12math 12 0)
+#+END_SRC
+
+#+RESULTS:
+: 0
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(pc-compari 11 2)
+#+END_SRC
+
+#+RESULTS:
+: 3
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(pc-compari 0 1)
+#+END_SRC
+
+#+RESULTS:
+: 1
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(pc-compari 12 0)
+#+END_SRC
+
+#+RESULTS:
+: 0
+
+** primer--needs documentation
+*** cl--this transformation is then transformed by prime-vector oddly?
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun primer (ordered-set)
   (cond ((null ordered-set) ())
@@ -1525,8 +1591,25 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
 #+RESULTS:
 | 3 | 2 | 1 | 0 |
+*** clj--primer calls last, which in the cl version I've called last1
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn primer [ordered-set]
+  (cond (empty? ordered-set) ()
+        :else (cons (pc-compari (first ordered-set) (last ordered-set))
+                    (primer (butlast ordered-set)))))
+#+END_SRC
 
-** prime-vector
+#+RESULTS:
+: #'post_tonal_overtone.core/primer
+#+BEGIN_SRC clojure :session cl-to-cloj
+(primer '(11 0 1 2))
+#+END_SRC
+
+#+RESULTS:
+| 3 | 2 | 1 | 0 |
+
+** prime-vector--called only by find-prime-form (and wrap vector, which is uncalled)
+*** cl--odd transformation
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun prime-vector (ordered-set)
   (let ((basic-vector (primer ordered-set)))
@@ -1542,8 +1625,27 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
 #+RESULTS:
 | 3 | 1 | 2 |
+*** clj									:clj:
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn prime-vector [ordered-set]
+  (let [basic-vector (primer ordered-set)]
+    (cons (first basic-vector) (butlast (reverse (butlast basic-vector))))))
+#+END_SRC
 
-** list-to-integer
+#+RESULTS:
+: #'post_tonal_overtone.core/prime-vector
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(prime-vector '(11 0 1 2))
+#+END_SRC
+
+#+RESULTS:
+| 3 | 1 | 2 |
+
+** list-to-integer--called by find-prime-form and comparing
+*** cl
+
+Why does this add a zero?
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun list-to-integer (lst-of-ints)
   (let ((high-exp (length lst-of-ints)))
@@ -1559,9 +1661,34 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  : LIST-TO-INTEGER
 
 #+BEGIN_SRC lisp :session cl-to-cloj
-
+(list-to-integer ' (11 2 6 7))
 #+END_SRC
-** find-prime-form-from-list
+
+#+RESULTS:
+: 112670
+*** clj--can be done with library function?
+#+BEGIN_SRC clojure :session cl-to-cloj
+(Integer/parseInt (str 11 2 6 7))
+#+END_SRC
+
+#+RESULTS:
+: 11267
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn list-to-integer [lst-of-ints] (Integer/parseInt (apply str lst-of-ints)))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/list-to-integer
+#+BEGIN_SRC clojure :session cl-to-cloj
+(list-to-integer '(11 2 6 7))
+#+END_SRC
+
+#+RESULTS:
+: 11267
+
+** find-prime-form-from-list--calls all-rotations, prime-vector, list-to-integer
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun find-prime-form-from-list (ordered-pcset)
   (let* ((a (all-rotations ordered-pcset))
@@ -1573,7 +1700,35 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : FIND-PRIME-FORM-FROM-LIST
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(find-prime-form-from-list '(0 1 5 6 8))
+#+END_SRC
+
+#+RESULTS:
+| 5 | 6 | 8 | 0 | 1 |
+*** clj
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn find-prime-form-from-list [ordered-pcset]
+  (let [a (all-rotations ordered-pcset)
+        b (map prime-vector a)
+        c (map list-to-integer b)
+        d (apply min c)]
+    (nth a (first (positions #(= d %) c)))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/find-prime-form-from-list
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(find-prime-form-from-list '(0 1 5 6 8))
+#+END_SRC
+
+#+RESULTS:
+| 5 | 6 | 8 | 0 | 1 |
+
 ** set-to-zero--called by forte decision
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-to-zero (ordered-pcset)
   (let ((n (car ordered-pcset)))
@@ -1587,6 +1742,8 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  : SET-TO-ZERO
 
 ** invert-mod12-pcset--called by forte-decision
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun invert-mod12-pcset (pcset)
  (sort (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))) #'<))
@@ -1596,6 +1753,8 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  : INVERT-MOD12-PCSET
 
 ** forte-decision--called by forte primeA
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-decision (pcset)
   (let ((a (set-to-zero (find-prime-form-from-list pcset))))
@@ -1606,6 +1765,8 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  : FORTE-DECISION
 
 ** another-forte--called by forte primeA
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun another-forte (setx sety)
   (let ((a setx) (b sety))
@@ -1637,6 +1798,8 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  ;; them? quote unquote.
 
 ** forte-primeA--called by multiset-forte-primeA
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-primeA (pcset)
   (let ((a (forte-decision pcset)))
@@ -1647,6 +1810,8 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  : FORTE-PRIMEA
 
 ** multiset-forte-primeA--called once by IMSET-DECISION-MAKER; used as a "database"
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-primeA (mset)
  (forte-primeA (remove-duplicates mset)))
@@ -1665,7 +1830,7 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  : WRAP-VECTORS
 
 #+BEGIN_SRC lisp :session cl-to-cloj
-(wra
+
 #+END_SRC
 
 ** [#B] Ainvert-mod12-pcset--called only by a never-called function 
