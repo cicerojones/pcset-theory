@@ -157,6 +157,8 @@ conjoining every two elements"
 (defun createA-lewin-vector (paired-set)
   (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
 
+
+;; goes uncalled?
 (defun create-24-lewin-vectors (paired-list)
   (let* ((a (make-pairs-from-list 
 	     (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
@@ -165,9 +167,13 @@ conjoining every two elements"
 	 (c (mapcar #'reverse b)))
     (append b c)))
 
+
+;; used only by a function that goes uncalled?
 (defun create-Astraus-profile (paired-list)
   (clean-profile (createA-lewin-vector paired-list)))
 
+
+;; goes uncalled
 (defun create-12A-straus-profiles (paired-list)
   (let ((a (make-pairs-from-list 
 	    (set-up-Tn-equivalent-Ys-with-X (car paired-list) 

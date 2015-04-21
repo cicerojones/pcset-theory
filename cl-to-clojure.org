@@ -383,7 +383,7 @@ flatten rec-do-compari and passing THAT?
 | 0 | 0 | 1 | 1 | 2 | 11 |
 
 
-**** two create-straus-profiles
+**** [#B] two create-straus-profiles--only called by create-12-straus, which goes uncalled
 #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-straus-profile (set1 set2)
   (clean-profile (create-lewin-vector set1 set2)))
@@ -1063,8 +1063,22 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+RESULTS:
 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-** create-straus-profile
+** createA-lewin-vector--ONLY ONE USED 
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun createA-lewin-vector (paired-set)
+  (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
+ #+END_SRC
 
+ #+RESULTS:
+ : CREATEA-LEWIN-VECTOR
+#+BEGIN_SRC lisp :session cl-to-cloj
+(createA-lewin-vector '((0 1) (0 2)))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+** [#B] create-straus-profile--only called by?
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-straus-profile (set1 set2)
@@ -1100,7 +1114,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+RESULTS:
 | 0 | 1 | 2 | 11 |
 
-** create-12-straus-profiles
+** [#B] create-12-straus-profiles--goes uncalled?
 
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1174,7 +1188,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 0 | 1 | 2 | 10 | 11 | 11 |
 | 0 | 0 | 1 |  2 |  3 | 11 |
 
-** create-12-lewin-vectors
+** [#B] create-12-lewin-vectors--goes uncalled?
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12-lewin-vectors (set1 set2)
   (let ((a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))))
@@ -1183,13 +1197,10 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
       (mapcar #'rec a))))
  #+END_SRC
 
-** createA-lewin-vector
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun createA-lewin-vector (paired-set)
-  (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
- #+END_SRC
+ #+RESULTS:
+ : CREATE-12-LEWIN-VECTORS
 
-** create-24-lewin-vectors
+** [#B] create-24-lewin-vectors--goes uncalled?
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-24-lewin-vectors (paired-list)
   (let* ((a (make-pairs-from-list 
@@ -1200,13 +1211,13 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
     (append b c)))
  #+END_SRC
 
-** create-Astraus-profile
+** [#B] create-Astraus-profile--called only by create-12A, which goes uncalled
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-Astraus-profile (paired-list)
   (clean-profile (createA-lewin-vector paired-list)))
  #+END_SRC
 
-** create-12A-straus-profiles
+** [#B] create-12A-straus-profiles
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12A-straus-profiles (paired-list)
   (let ((a (make-pairs-from-list 
@@ -1216,7 +1227,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 * set searching
-** looking
+** looking--is called by comparing
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun looking (mset)
   (cond ((null mset) ())
@@ -1224,14 +1235,115 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 		 (looking (cdr mset))))))
  #+END_SRC
 
-** comparing
+ #+RESULTS:
+ : LOOKING
+#+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 |
+| 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(reverse (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2)))))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(append (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))))
+	(reverse (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2)))))
+)
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 |
+| 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+| 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+#+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'clean-profile (append (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))))
+	   (reverse (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2)))))
+	   ))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 |  2 | 11 |
+| 0 | 1 |  2 |  3 |
+| 1 | 2 |  3 |  4 |
+| 2 | 3 |  4 |  5 |
+| 3 | 4 |  5 |  6 |
+| 4 | 5 |  6 |  7 |
+| 5 | 6 |  7 |  8 |
+| 6 | 7 |  8 |  9 |
+| 7 | 8 |  9 | 10 |
+| 8 | 9 | 10 | 11 |
+| 0 | 9 | 10 | 11 |
+| 0 | 1 | 10 | 11 |
+| 0 | 1 | 10 | 11 |
+| 0 | 9 | 10 | 11 |
+| 8 | 9 | 10 | 11 |
+| 7 | 8 |  9 | 10 |
+| 6 | 7 |  8 |  9 |
+| 5 | 6 |  7 |  8 |
+| 4 | 5 |  6 |  7 |
+| 3 | 4 |  5 |  6 |
+| 2 | 3 |  4 |  5 |
+| 1 | 2 |  3 |  4 |
+| 0 | 1 |  2 |  3 |
+| 0 | 1 |  2 | 11 |
+
+** comparing--is called by locating
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun comparing (mset-list)
   (let ((canon (mapcar #'list-to-integer (mapcar #'looking mset-list))))
     (list (apply #'max canon) canon)))
  #+END_SRC
 
-** locating
+** locating--only called once. deals with an edge case
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun locating (mset-list)
   (let ((chart (comparing mset-list)))
@@ -1368,33 +1480,21 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** forte-decision
+** forte-decision--called by forte primeA
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-decision (pcset)
   (let ((a (set-to-zero (find-prime-form-from-list pcset))))
     (list a (set-to-zero (find-prime-form-from-list (invert-mod12-pcset a))))))
  #+END_SRC
 
-
-** forte-prime
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun forte-prime (pcset)
-  (let ((a (forte-decision pcset)))
-    (if (every #'<= (car a) (cadr a))
-	(car a)
-	(cadr a))))
- #+END_SRC
-
-
-** forte-primeA
+** forte-primeA--called by multiset version
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-primeA (pcset)
   (let ((a (forte-decision pcset)))
     (another-forte (car a) (cadr a))))
  #+END_SRC
 
-
-** another-forte
+** another-forte--called by forte primeA
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun another-forte (setx sety)
   (let ((a setx) (b sety))
@@ -1422,26 +1522,35 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  ;; simply remove duplicates you say, eh? how would you reintroduce
  ;; them? quote unquote.
 
-
-** multiset-forte-primeA
+** multiset-forte-primeA--called once; used as a "database"
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-primeA (mset)
  (forte-primeA (remove-duplicates mset)))
  #+END_SRC
 
+** [#B] forte-prime--only called by multiset-forte-prime, which goes uncalled
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun forte-prime (pcset)
+  (let ((a (forte-decision pcset)))
+    (if (every #'<= (car a) (cadr a))
+	(car a)
+	(cadr a))))
+ #+END_SRC
 
-** multiset-forte-prime
+** [#B] multiset-forte-prime--goes uncalled
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-prime (mset)
  (forte-prime (remove-duplicates mset)))
  #+END_SRC
 
-
-** multiset-forte-decision
+** [#B] multiset-forte-decision--goes uncalled
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-decision (mset)
   (forte-decision (remove-duplicates mset)))
  #+END_SRC
+
+ #+RESULTS:
+ : MULTISET-FORTE-DECISION
 
 * full documentation separated out for imset-decision-maker
 
