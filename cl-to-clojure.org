@@ -1030,7 +1030,21 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 3 |  2 |  1 |
 
 * wrap various functions from above
-** create-lewin-vector
+** createA-lewin-vector--called by IMSET-DECISION-MAKER
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun createA-lewin-vector (paired-set)
+  (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
+ #+END_SRC
+
+ #+RESULTS:
+ : CREATEA-LEWIN-VECTOR
+#+BEGIN_SRC lisp :session cl-to-cloj
+(createA-lewin-vector '((0 1) (0 2)))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+** [#B] create-lewin-vector--only called by functions never called
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-lewin-vector (set1 set2)
@@ -1062,21 +1076,6 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 
 #+RESULTS:
 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-
-** createA-lewin-vector--ONLY ONE USED 
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun createA-lewin-vector (paired-set)
-  (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
- #+END_SRC
-
- #+RESULTS:
- : CREATEA-LEWIN-VECTOR
-#+BEGIN_SRC lisp :session cl-to-cloj
-(createA-lewin-vector '((0 1) (0 2)))
-#+END_SRC
-
-#+RESULTS:
-| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
 ** [#B] create-straus-profile--only called by?
 *** cl
@@ -1414,6 +1413,21 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : ROTATE
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(rotate '(0 1 2 11) 1)
+#+END_SRC
+
+#+RESULTS:
+| 1 | 2 | 11 | 0 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(rotate '(0 1 2 11) 2)
+
+#+END_SRC
+
+#+RESULTS:
+| 2 | 11 | 0 | 1 |
+
 1. rotate
 2. my-rotate
 3. all-rotations
@@ -1442,6 +1456,13 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : MY-ROTATE
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(my-rotate '(0 1 2 11))
+#+END_SRC
+
+#+RESULTS:
+|          0 |                             1 | 2 | 11 |
+| (11 0 1 2) | ((2 11 0 1) ((1 2 11 0) NIL)) |   |    |
 
 ** all-rotations
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1452,8 +1473,18 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : ALL-ROTATIONS
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(all-rotations '(0 1 2 11))
 
-** mod12math
+#+END_SRC
+
+#+RESULTS:
+|  0 |  1 |  2 | 11 |
+| 11 |  0 |  1 |  2 |
+|  2 | 11 |  0 |  1 |
+|  1 |  2 | 11 |  0 |
+
+** mod12math--replicates other mod12 arithmetic??
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun mod12math (less more)
   (cond ((<= less more) (- more less))
@@ -1463,6 +1494,19 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : MOD12MATH
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(mod12math 0 1)
+#+END_SRC
+
+#+RESULTS:
+: 1
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(mod12math 11 2)
+#+END_SRC
+
+#+RESULTS:
+: 3
 
 ** primer
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1475,6 +1519,12 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : PRIMER
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(primer '(11 0 1 2))
+#+END_SRC
+
+#+RESULTS:
+| 3 | 2 | 1 | 0 |
 
 ** prime-vector
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1486,16 +1536,12 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : PRIME-VECTOR
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(prime-vector '(11 0 1 2))
+#+END_SRC
 
-** wrap-vectors
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun wrap-vectors (ordered-set)
-  (mapcar #'prime-vector (all-rotations ordered-set)))
- #+END_SRC
-
- #+RESULTS:
- : WRAP-VECTORS
-
+#+RESULTS:
+| 3 | 1 | 2 |
 
 ** list-to-integer
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1512,7 +1558,9 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : LIST-TO-INTEGER
 
+#+BEGIN_SRC lisp :session cl-to-cloj
 
+#+END_SRC
 ** find-prime-form-from-list
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun find-prime-form-from-list (ordered-pcset)
@@ -1525,8 +1573,7 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : FIND-PRIME-FORM-FROM-LIST
 
-
-** set-to-zero
+** set-to-zero--called by forte decision
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-to-zero (ordered-pcset)
   (let ((n (car ordered-pcset)))
@@ -1539,8 +1586,7 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  #+RESULTS:
  : SET-TO-ZERO
 
-
-** invert-mod12-pcset
+** invert-mod12-pcset--called by forte-decision
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun invert-mod12-pcset (pcset)
  (sort (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))) #'<))
@@ -1548,27 +1594,6 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
  #+RESULTS:
  : INVERT-MOD12-PCSET
-
-
-** Ainvert-mod12-pcset
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun Ainvert-mod12-pcset (pcset)
- (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
- #+END_SRC
-
- #+RESULTS:
- : AINVERT-MOD12-PCSET
-
-
-** find-set-inversion
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun find-set-inversion (pcset)
-  (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
- #+END_SRC
-
- #+RESULTS:
- : FIND-SET-INVERSION
-
 
 ** forte-decision--called by forte primeA
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1579,16 +1604,6 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
  #+RESULTS:
  : FORTE-DECISION
-
-** forte-primeA--called by multiset version
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun forte-primeA (pcset)
-  (let ((a (forte-decision pcset)))
-    (another-forte (car a) (cadr a))))
- #+END_SRC
-
- #+RESULTS:
- : FORTE-PRIMEA
 
 ** another-forte--called by forte primeA
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1621,7 +1636,17 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
  ;; simply remove duplicates you say, eh? how would you reintroduce
  ;; them? quote unquote.
 
-** multiset-forte-primeA--called once; used as a "database"
+** forte-primeA--called by multiset-forte-primeA
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun forte-primeA (pcset)
+  (let ((a (forte-decision pcset)))
+    (another-forte (car a) (cadr a))))
+ #+END_SRC
+
+ #+RESULTS:
+ : FORTE-PRIMEA
+
+** multiset-forte-primeA--called once by IMSET-DECISION-MAKER; used as a "database"
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-primeA (mset)
  (forte-primeA (remove-duplicates mset)))
@@ -1629,6 +1654,37 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
  #+RESULTS:
  : MULTISET-FORTE-PRIMEA
+
+** [#B] wrap-vectors--never called
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun wrap-vectors (ordered-set)
+  (mapcar #'prime-vector (all-rotations ordered-set)))
+ #+END_SRC
+
+ #+RESULTS:
+ : WRAP-VECTORS
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(wra
+#+END_SRC
+
+** [#B] Ainvert-mod12-pcset--called only by a never-called function 
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun Ainvert-mod12-pcset (pcset)
+ (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
+ #+END_SRC
+
+ #+RESULTS:
+ : AINVERT-MOD12-PCSET
+
+** [#B] find-set-inversion--never called
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun find-set-inversion (pcset)
+  (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
+ #+END_SRC
+
+ #+RESULTS:
+ : FIND-SET-INVERSION
 
 ** [#B] forte-prime--only called by multiset-forte-prime, which goes uncalled
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1797,7 +1853,6 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
 
 
-
 ** locate is uncalled??
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun map-locate (loli)
@@ -1808,7 +1863,6 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 			     (hmm (cdr rec-loli)))))))
      (hmm loli))))
  #+END_SRC
-
 
 ** massive full unexpurgated function composition--up to comparing length of results
 

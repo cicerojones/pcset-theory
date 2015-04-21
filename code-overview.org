@@ -1,3 +1,7 @@
+* babel documentation--added when?
+* some of this may be obsolete
+** basic utilities
+
 #+NAME list+ adds an integer to each member of a list
 #+BEGIN_SRC lisp
 (list+ 1 '(0 1 2))
@@ -159,10 +163,7 @@
  ((0 1) (0 1 2 4))
  ((0 1) (0 1 3 4)))
 #+END_SRC
-
-
-
-
+** address cardinality issues
 #+BEGIN_SRC lisp
 (pair-x-y-forms-same-cardinality '(0 1 2))
 (((0 1 2) (0 1 2)) ((0 1 2) (0 1 3)) ((0 1 2) (0 2 3)) ((0 1 2) (0 1
@@ -219,6 +220,7 @@
 1 1 1) (1 1 0 0 0 0 0 0 0 0 1 1))
 #+END_SRC
 
+** calculate weigthed sums
 #+BEGIN_SRC lisp
 (orzo-sum '(1 1 1 0 0 0 0 0 0 0 0 1))
 11.455319
@@ -510,7 +512,8 @@ NIL
 (0 2 5 9)
 #+END_SRC
 
-;;;; figuring out how the latest prime-form code works
+* more up-to-date
+** figuring out how the latest prime-form code works
 
 
 ;; mod12math is different from mod12 how?
