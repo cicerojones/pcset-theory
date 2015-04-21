@@ -40,6 +40,9 @@
 (set-up '(0 1 2) '((0 1 2) (0 4) (0 1 2 4 6)))
 ((0 1 2) (0 1 2) (0 1 2) (0 4) (0 1 2) (0 1 2 4 6))
 
+
+;; name of this function changed to the more descriptive:
+;; set-up-Tn-equivalent-Ys-with-X
 (set-up-all '(0 1))
 (subseq (set-up-all '(0 1)) 0 21)
 ((0 1) (0 1) (0 1) (0 2) (0 1) (0 3) (0 1) (0 4) (0 1) (0 5) (0 1) (0 6) (0 1) (0 1 2) (0 1) (0 1 3) (0 1) (0 2 3) (0 1) (0 1 4) (0 1)) 
