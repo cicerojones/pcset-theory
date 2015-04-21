@@ -261,9 +261,11 @@ conjoining every two elements"
 (defun invert-mod12-pcset (pcset)
  (sort (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))) #'<))
 
+;;; deprecated?
 (defun Ainvert-mod12-pcset (pcset)
  (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
 
+;; deprecated?
 (defun find-set-inversion (pcset)
   (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
 

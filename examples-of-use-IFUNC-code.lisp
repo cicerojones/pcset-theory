@@ -1,3 +1,5 @@
+;;; badly out of date documentation--need to eliminate old code and document actually used new functions
+
 (list+ 1 '(0 1 2))
 (1 2 3)
 

@@ -309,7 +309,7 @@
 **** contains? is best on maps, not lists or vectors
 http://clojuredocs.org/clojure.core/contains_q
 
-** "clean profile" flattens and removes nill
+** [#A] "clean profile" flattens and removes nill
 *** understanding what clean profile is doing
 **** produce all intervals between two pcsets--rec-do-compari
 #+BEGIN_SRC lisp :session cl-to-cloj
@@ -382,7 +382,6 @@ flatten rec-do-compari and passing THAT?
 #+RESULTS:
 | 0 | 0 | 1 | 1 | 2 | 11 |
 
-
 **** [#B] two create-straus-profiles--only called by create-12-straus, which goes uncalled
 #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-straus-profile (set1 set2)
@@ -420,11 +419,16 @@ I.e. create-straus-profile is:
  #+RESULTS:
  | 1 | 2 | 3 | 3 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 7 | 7 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 |
 
-*** clj?--create straus profile directly				:clj:
+*** [#A] clj?--create straus profile directly				:clj:
+never finished!
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn clean-profile [single-vector]
 (sort (flatten (rec-do-pc-compari ))))
 #+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/clean-profile
+
 * the ever intriguing de-nesting problem
 ** de-nesting to one level
 *** cl
@@ -1591,7 +1595,7 @@ the above functions in clojure as well.
 
 #+RESULTS:
 | 3 | 2 | 1 | 0 |
-*** clj--primer calls last, which in the cl version I've called last1
+*** clj--primer calls last, which in the cl version I've called last1	:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn primer [ordered-set]
   (cond (empty? ordered-set) ()
@@ -1666,7 +1670,7 @@ Why does this add a zero?
 
 #+RESULTS:
 : 112670
-*** clj--can be done with library function?
+*** clj--can be done with library function?				:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (Integer/parseInt (str 11 2 6 7))
 #+END_SRC
@@ -1706,7 +1710,7 @@ Why does this add a zero?
 
 #+RESULTS:
 | 5 | 6 | 8 | 0 | 1 |
-*** clj
+*** clj									:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn find-prime-form-from-list [ordered-pcset]
   (let [a (all-rotations ordered-pcset)
@@ -1727,8 +1731,7 @@ Why does this add a zero?
 | 5 | 6 | 8 | 0 | 1 |
 
 ** set-to-zero--called by forte decision
-
-*** cl
+*** cl--refactor 'cond' to 'if'
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-to-zero (ordered-pcset)
   (let ((n (car ordered-pcset)))
@@ -1740,10 +1743,31 @@ Why does this add a zero?
 
  #+RESULTS:
  : SET-TO-ZERO
+#+BEGIN_SRC lisp :session cl-to-cloj
+(set-to-zero '(1 2 3 5))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 4 |
+*** clj
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn set-to-zero [ordered-pcset]
+  (let [n (first ordered-pcset)]
+    (map (fn [x] (if (>= x n)
+                   (- x n)
+                   (- (+ 12 x) n)))
+         ordered-pcset)))
+#+END_SRC
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(set-to-zero '(1 2 3 5))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 4 |
 
 ** invert-mod12-pcset--called by forte-decision
-
-*** cl
+*** cl--icky
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun invert-mod12-pcset (pcset)
  (sort (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))) #'<))
@@ -1752,8 +1776,29 @@ Why does this add a zero?
  #+RESULTS:
  : INVERT-MOD12-PCSET
 
-** forte-decision--called by forte primeA
+#+BEGIN_SRC lisp :session cl-to-cloj
+(invert-mod12-pcset '(0 3 7 10))
+#+END_SRC
 
+#+RESULTS:
+| 0 | 2 | 5 | 9 |
+
+*** clj									:clj:
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn invert-mod12-pcset [pcset]
+  (sort (mapcat mod12 (list (map #(- 12 %) pcset)))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/invert-mod12-pcset
+#+BEGIN_SRC clojure :session cl-to-cloj
+(invert-mod12-pcset '(0 3 7 10))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 2 | 5 | 9 |
+
+** forte-decision--called by forte primeA
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-decision (pcset)
@@ -1763,9 +1808,43 @@ Why does this add a zero?
 
  #+RESULTS:
  : FORTE-DECISION
+#+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'forte-decision '((0 1 5 6 8) (0 1 5 7 8) (0 2 3 6 7 9) (0 1 4 5 7 9) (0 1 3 5 8 9) (0 1 4 6 8 9) (0 1 2 5 6 7 9) (0 1 3 4 5 7 8 10)))
+#+END_SRC
+
+#+RESULTS:
+| (0 1 3 7 8)        | (0 1 5 7 8)        |
+| (0 1 5 7 8)        | (0 1 3 7 8)        |
+| (0 1 3 6 8 9)      | (0 1 3 6 8 9)      |
+| (0 1 3 5 8 9)      | (0 1 4 6 8 9)      |
+| (0 1 3 5 8 9)      | (0 1 4 6 8 9)      |
+| (0 1 4 6 8 9)      | (0 1 3 5 8 9)      |
+| (0 1 2 4 7 8 9)    | (0 1 2 5 7 8 9)    |
+| (0 1 2 4 5 7 9 10) | (0 1 2 4 5 7 9 10) |
+*** clj									:clj:
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn forte-decision [pcset]
+  (let [a (set-to-zero (find-prime-form-from-list pcset))]
+    (list a (set-to-zero (find-prime-form-from-list (invert-mod12-pcset a))))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/forte-decision
+#+BEGIN_SRC clojure :session cl-to-cloj
+(map #'forte-decision '((0 1 5 6 8) (0 1 5 7 8) (0 2 3 6 7 9) (0 1 4 5 7 9) (0 1 3 5 8 9) (0 1 4 6 8 9) (0 1 2 5 6 7 9) (0 1 3 4 5 7 8 10)))
+#+END_SRC
+
+#+RESULTS:
+| (0 1 3 7 8)        | (0 1 5 7 8)        |
+| (0 1 5 7 8)        | (0 1 3 7 8)        |
+| (0 1 3 6 8 9)      | (0 1 3 6 8 9)      |
+| (0 1 3 5 8 9)      | (0 1 4 6 8 9)      |
+| (0 1 3 5 8 9)      | (0 1 4 6 8 9)      |
+| (0 1 4 6 8 9)      | (0 1 3 5 8 9)      |
+| (0 1 2 4 7 8 9)    | (0 1 2 5 7 8 9)    |
+| (0 1 2 4 5 7 9 10) | (0 1 2 4 5 7 9 10) |
 
 ** another-forte--called by forte primeA
-
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun another-forte (setx sety)
@@ -1781,24 +1860,35 @@ Why does this add a zero?
  #+RESULTS:
  : ANOTHER-FORTE
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(another-forte ' (0 1 3 7 8) ' (0 1 5 7 8))
+#+END_SRC
 
- ;; (defun 24create (paired-list)
- ;;   (let* ((a (make-pairs-from-list 
- ;; 	     (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
- ;; 					     (cadr paired-list))))
- ;; 	 (b (mapcar #'createA-lewin-vector a))
- ;; 	 (c (mapcar #'reverse b))
- ;; 	 (d (append b c))
- ;; 	 (e (mapcar #'clean-profile d)) ; effectively creates a straus-profile
- ;; 	 (f (mapcar #'multiset-forte-prime e))
- ;; 	 (g (mapcar #'multiset-forte-decision e)))
- ;;     (mapcar #'list d e f g)))
+#+RESULTS:
+| 0 | 1 | 3 | 7 | 8 |
+*** clj									:clj:
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn another-forte [setx sety]
+  (let [a setx b sety]
+    (letfn [(rec [set1 set2]
+              (cond (empty? set1) setx
+                    (> (first set1) (first set2)) sety
+                    (< (first set1) (first set2)) setx
+                    :else (rec (rest set1) (rest set2))))]
+      (rec a b))))
+#+END_SRC
 
- ;; simply remove duplicates you say, eh? how would you reintroduce
- ;; them? quote unquote.
+#+RESULTS:
+: #'post_tonal_overtone.core/another-forte
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(another-forte ' (0 1 3 7 8) ' (0 1 5 7 8))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 3 | 7 | 8 |
 
 ** forte-primeA--called by multiset-forte-primeA
-
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-primeA (pcset)
@@ -1808,8 +1898,66 @@ Why does this add a zero?
 
  #+RESULTS:
  : FORTE-PRIMEA
+#+BEGIN_SRC lisp :session cl-to-cloj
+(forte-primeA ' (0 1 5 7 8))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 3 | 7 | 8 |
+*** clj									:clj:
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn forte-primeA [pcset]
+  (let [a (forte-decision pcset)]
+    (another-forte (first a) (second a))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/forte-primeA
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(forte-primeA ' (0 1 5 7 8))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 3 | 7 | 8 |
 
 ** multiset-forte-primeA--called once by IMSET-DECISION-MAKER; used as a "database"
+
+*** hmm
+uh, does multiset-forte-primeA really take multisets for its argument?
+Yes, call it with the results of some other ~clean-profile~ of lewin
+vectors.
+
+also, if forte-primeA requires a single set argument, is being called
+with a whole list of lists for a reason?
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(clean-profile '(0 1 1 2 3 3 3 5 7 0 10 11))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 2 | 3 | 3 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 7 | 7 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(forte-primeA (clean-profile '(0 1 1 2 3 3 3 5 7 0 10 11)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 3 | 3 | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 8 | 8 | 9 | 10 | 0 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(remove-duplicates (clean-profile '(0 1 1 2 3 3 3 5 7 0 10 11)))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 10 | 11 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(forte-primeA (remove-duplicates (clean-profile '(0 1 1 2 3 3 3 5 7 0 10 11))))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 9 | 10 |
 
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1820,6 +1968,53 @@ Why does this add a zero?
  #+RESULTS:
  : MULTISET-FORTE-PRIMEA
 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(multiset-forte-primeA '((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
+
+*** clj
+#+BEGIN_SRC clojure :session cl-to-cloj
+(clean-profile '(0 1 1 2 3 3 3 5 6 0 10 11))
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn multiset-forte-primeA [mset]
+(forte-primeA (distinct mset)))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/multiset-forte-primeA
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(distinct '((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 |  2 | 11 |
+| 0 | 1 |  2 |  3 |
+| 1 | 2 |  3 |  4 |
+| 2 | 3 |  4 |  5 |
+| 3 | 4 |  5 |  6 |
+| 4 | 5 |  6 |  7 |
+| 5 | 6 |  7 |  8 |
+| 6 | 7 |  8 |  9 |
+| 7 | 8 |  9 | 10 |
+| 8 | 9 | 10 | 11 |
+| 0 | 9 | 10 | 11 |
+| 0 | 1 | 10 | 11 |
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(forte-primeA '((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11)))
+#+END_SRC
+
+#+RESULTS:
+
+*** 
 ** [#B] wrap-vectors--never called
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun wrap-vectors (ordered-set)
@@ -2032,6 +2227,8 @@ Why does this add a zero?
 ** massive full unexpurgated function composition--up to comparing length of results
 
 #+BEGIN_SRC lisp :session cl-to-cloj
+
+;;; used to check the 'j' step
 (length
  (remove-duplicates
   (loop for idx in
@@ -2070,6 +2267,7 @@ Why does this add a zero?
 						   (make-pairs-from-list 
 						    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
 										    '(0 2)))))))) ) :test #'equal))
+
 ;; 1
 
 (remove-duplicates (loop for idx in (cdr (locate (multiset-forte-primeA (car (mapcar #'clean-profile
