@@ -423,7 +423,7 @@ I.e. create-straus-profile is:
 *** clj?--create straus profile directly
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn clean-profile [single-vector]
-(sort (flatten (rec-do-pc-compari 
+(sort (flatten (rec-do-pc-compari ))))
 #+END_SRC
 * the ever intriguing de-nesting problem
 ** de-nesting to one level
@@ -632,6 +632,15 @@ conjoining every two elements"
 | 4 | 5 |
 | 6 | 7 |
 | 8 | 9 |
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn make-pairs-from-list [lst]
+(partition 2 lst))
+
+(make-pairs-from-list '(0 1 2 3 4 5 6 7 8 9))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/make-pairs-from-list((0 1) (2 3) (4 5) (6 7) (8 9))
 
 ** join up the first element from a given set with the rest of sets--jack-b
 needs a better name!
@@ -820,7 +829,6 @@ construct those some other way?
 : ((0 0) (0 1) (0 2) (0 3) (0 4) (0 5) (1 1) (1 2) (1 3) (1 4) (1 5) (2 2) (2 3) (2 4) (2 5) (3 3) (3 4) (3 5) (4 4) (4 5) (5 5))
 
 ** set-up-Tn-equivalent-Ys-with-X
-
 *** cl
 This bad-boy will eventually be dealing with massive state. Let's see
 an example?
@@ -865,14 +873,24 @@ Produces pairs of set1 and transposed versions of set2
 | 11 |  0 |  2 |
 
 *** clj
-**** clj-- produces wrong order
+**** clj prepare-set-up
 #+BEGIN_SRC clojure :session cl-to-cloj
-(defn set-up-tn-equivalent-ys-with-x [pcset1 pcset2]
+(defn prepare-set-up-tn-equivalent-Ys-with-x [pcset1 pcset2]
  (set-up pcset1 (first (TnI-all (list pcset2)))))
 #+END_SRC
 
 #+RESULTS:
-: #'post_tonal_overtone.core/set-up-tn-equivalent-ys-with-x
+: #'post_tonal_overtone.core/prepare-set-up-tn-equivalent-Ys-with-x
+
+**** clj-- produces wrong order!!!
+(set-up-Tn-equivalent-Ys-with-X set1 set2)
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn set-up-Tn-equivalent-Ys-with-X [pcset1 pcset2]
+(map reverse (partition 2 (prepare-set-up-tn-equivalent-Ys-with-x '(0 1) '(0 1 3)))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/set-up-Tn-equivalent-Ys-with-X
 
 **** requirees two steps
 #+BEGIN_SRC clojure :session cl-to-cloj
@@ -1057,6 +1075,9 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  : CREATE-STRAUS-PROFILE
 
 *** clj
+
+
+
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn create-straus-profile [set1 set2]
   (clean-profile (create-lewin-vector set1 set2)))
@@ -1064,7 +1085,24 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 
 #+RESULTS:
 
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn create-straus-profile [set1 set2]
+  (sort (flatten (rec-do-pc-compari set1 set2))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/create-straus-profile
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(create-straus-profile '(0 1) '(0 2))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 11 |
+
 ** create-12-straus-profiles
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12-straus-profiles (set1 set2)
   (let ((a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))))
@@ -1093,6 +1131,48 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 8 | 9 | 10 | 11 |
 | 0 | 9 | 10 | 11 |
 | 0 | 1 | 10 | 11 |
+
+*** clj--make-pairs-from list redunant
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn create-12-straus-profiles [set1 set2]
+  (let [a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))]
+    (letfn [(rec [lst]
+              (create-straus-profile (first lst) (second lst)))]
+      (map rec a))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/create-12-straus-profiles
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn create-12-straus-profiles [set1 set2]
+  (let [a (set-up-Tn-equivalent-Ys-with-X set1 set2)]
+    (letfn [(rec [lst]
+              (create-straus-profile (first lst) (second lst)))]
+      (map rec a))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/create-12-straus-profiles
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(create-12-straus-profiles '(0 1) '(0 2))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 | 1 |  2 |  3 | 11 |
+| 0 | 1 | 1 |  2 |  3 |  4 |
+| 1 | 2 | 2 |  3 |  4 |  5 |
+| 2 | 3 | 3 |  4 |  5 |  6 |
+| 3 | 4 | 4 |  5 |  6 |  7 |
+| 4 | 5 | 5 |  6 |  7 |  8 |
+| 5 | 6 | 6 |  7 |  8 |  9 |
+| 6 | 7 | 7 |  8 |  9 | 10 |
+| 7 | 8 | 8 |  9 | 10 | 11 |
+| 0 | 8 | 9 |  9 | 10 | 11 |
+| 0 | 1 | 9 | 10 | 10 | 11 |
+| 0 | 1 | 2 | 10 | 11 | 11 |
+| 0 | 0 | 1 |  2 |  3 | 11 |
 
 ** create-12-lewin-vectors
  #+BEGIN_SRC lisp :session cl-to-cloj
