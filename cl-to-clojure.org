@@ -531,7 +531,6 @@ http://clojuredocs.org/clojure.core/contains_q
 #+RESULTS:
 | 1 | 2 | 3 | 3 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 7 | 7 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 |
 
-
 * the ever intriguing de-nesting problem
 ** de-nesting to one level
 *** cl
@@ -993,7 +992,7 @@ Produces pairs of set1 and transposed versions of set2
 (set-up-Tn-equivalent-Ys-with-X set1 set2)
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn set-up-Tn-equivalent-Ys-with-X [pcset1 pcset2]
-(map reverse (partition 2 (prepare-set-up-tn-equivalent-Ys-with-x '(0 1) '(0 1 3)))))
+(map reverse (partition 2 (prepare-set-up-tn-equivalent-Ys-with-x pcset1 pcset2))))
 #+END_SRC
 
 #+RESULTS:
@@ -1138,6 +1137,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 
 * wrap various functions from above
 ** createA-lewin-vector--called by IMSET-DECISION-MAKER
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun createA-lewin-vector (paired-set)
   (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
@@ -1151,7 +1151,23 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 
 #+RESULTS:
 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-** [#B] create-lewin-vector--only called by functions never called
+*** clj createA-lewin-vector just wraps args in a list--destructuring!  :clj:
+ #+BEGIN_SRC clojure :session cl-to-cloj
+(defn createA-lewin-vector [[set1 set2]]
+  (counting (flatten (rec-do-pc-compari set1 set2))))
+ #+END_SRC
+
+ #+RESULTS:
+ : #'post_tonal_overtone.core/createA-lewin-vector
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(createA-lewin-vector '((0 1) (0 2)))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+** [#B] create-lewin-vector--only called by functions never called--need createA
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-lewin-vector (set1 set2)
@@ -1334,6 +1350,12 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 
 * set searching
 ** looking--is called by comparing
+*** code
+built recursively on ~count~, which in cl counts up the appearances of
+an element in the provided collection
+
+Is messy because the calling count on diminishing pieces of list
+produces spurious results.
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun looking (mset)
   (cond ((null mset) ())
@@ -1343,6 +1365,145 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 
  #+RESULTS:
  : LOOKING
+*** problems
+#+BEGIN_SRC lisp :session cl-to-cloj
+CL-USER> (looking '(1 1)) 
+0> Calling (LOOKING (1 1)) 
+ 1> Calling (LOOKING (1)) 
+  2> Calling (LOOKING NIL) 
+  <2 LOOKING returned NIL
+ <1 LOOKING returned (1) ; value returned by (looking 1) 
+<0 LOOKING returned (2 1) ; value returned by (looking 1 1) is cons-ed to above result
+(2 1)
+#+END_SRC
+*** follow a series of calls
+#+BEGIN_SRC lisp :session cl-to-cloj
+(looking '(1 2 3 4))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 1 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(looking '(1 1 3 4))
+#+END_SRC
+
+#+RESULTS:
+| 2 | 1 | 1 | 1 |
+
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(looking '(1 1 1 4))
+#+END_SRC
+
+#+RESULTS:
+| 3 | 2 | 1 | 1 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(looking '(1 1 1 1))
+#+END_SRC
+
+#+RESULTS:
+| 4 | 3 | 2 | 1 |
+** comparing--is called by locating
+*** code
+Wants a nested list
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun comparing (mset-list)
+  (let ((canon (mapcar #'list-to-integer (mapcar #'looking mset-list))))
+    (list (apply #'max canon) canon)))
+ #+END_SRC
+
+ #+RESULTS:
+ : COMPARING
+
+*** result of the weird locating is passed on here
+#+BEGIN_SRC lisp :session cl-to-cloj
+(comparing '((1 2 3 4)))
+#+END_SRC
+
+#+RESULTS:
+| 11110 | (11110) |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(comparing '((1 1 3 4)))
+#+END_SRC
+
+#+RESULTS:
+| 21110 | (21110) |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(comparing '((1 1 1 4)))
+#+END_SRC
+
+#+RESULTS:
+| 32110 | (32110) |
+
+** locating--only called once. deals with an edge case
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun locating (mset-list)
+  (let ((chart (comparing mset-list)))
+    (nth (1- (cadr (locate (car chart) (cadr chart)))) mset-list)))
+ #+END_SRC
+
+ #+RESULTS:
+ : LOCATING
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(locating '((1 1 2 2 3 3)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
+
+** locate--called once prominently, a kind of database lookup
+*** code
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun locate (x lat)
+  (let ((newlat (reverse lat)))
+    (labels
+	((rec (rec-x rec-lat)
+	   (cond ((null rec-lat) ())
+		 ((equal rec-x (car rec-lat)) 
+		  (cons (length rec-lat) (rec rec-x (cdr rec-lat))))
+		 (t (rec rec-x (cdr rec-lat))))))
+      (cons x (reverse (rec x newlat))))))
+ #+END_SRC
+*** cl--finds the occurrence of a value at a certain place in a list
+why does this return the value that was searched for as well as the
+location? Some peculiarity of where it is called?
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(locate 10 '(0 100 10 1000 10 100000))
+#+END_SRC
+
+#+RESULTS:
+| 10 | 3 | 5 |
+*** clj--can't quite use keep-indexed as locate 			:clj:
+taken from SO discussions about indices and finding
+http://stackoverflow.com/questions/4830900/how-do-i-find-the-index-of-an-item-in-a-vector
+http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-predicate-in-clojure
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn positions
+  [pred coll]
+  (keep-indexed (fn [idx x]
+                  (when (pred x)
+                    idx))
+                coll))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/positions
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(positions #(= % 10) '(0 100 10 1000 10 100000))
+#+END_SRC
+
+#+RESULTS:
+| 2 | 4 |
+
+** all these substeps of imset-decision-maker are here why?
 #+BEGIN_SRC lisp :session cl-to-cloj
 (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))))
 #+END_SRC
@@ -1441,84 +1602,6 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 1 | 2 |  3 |  4 |
 | 0 | 1 |  2 |  3 |
 | 0 | 1 |  2 | 11 |
-
-** comparing--is called by locating
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun comparing (mset-list)
-  (let ((canon (mapcar #'list-to-integer (mapcar #'looking mset-list))))
-    (list (apply #'max canon) canon)))
- #+END_SRC
-
- #+RESULTS:
- : COMPARING
-
-** locating--only called once. deals with an edge case
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun locating (mset-list)
-  (let ((chart (comparing mset-list)))
-    (nth (1- (cadr (locate (car chart) (cadr chart)))) mset-list)))
- #+END_SRC
-
- #+RESULTS:
- : LOCATING
-
-#+BEGIN_SRC lisp :session cl-to-cloj
-(locating '((0 1 2 3)))
-#+END_SRC
-
-#+RESULTS:
-| 0 | 1 | 2 | 3 |
-
-** locate--called once prominently, a kind of database lookup
-*** 
-*** cl--finds the occurrence of a value at a certain place in a list
-
-why does this return the value that was searched for as well as the
-location? Some peculiarity of where it is called?
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun locate (x lat)
-  (let ((newlat (reverse lat)))
-    (labels
-	((rec (rec-x rec-lat)
-	   (cond ((null rec-lat) ())
-		 ((equal rec-x (car rec-lat)) 
-		  (cons (length rec-lat) (rec rec-x (cdr rec-lat))))
-		 (t (rec rec-x (cdr rec-lat))))))
-      (cons x (reverse (rec x newlat))))))
- #+END_SRC
-
- #+RESULTS:
- : LOCATE
-
-#+BEGIN_SRC lisp :session cl-to-cloj
-(locate 10 '(0 100 10 1000 10 100000))
-#+END_SRC
-
-#+RESULTS:
-| 10 | 3 | 5 |
-*** clj--can't quite use keep-indexed as locate 			:clj:
-taken from SO discussions about indices and finding
-http://stackoverflow.com/questions/4830900/how-do-i-find-the-index-of-an-item-in-a-vector
-http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-predicate-in-clojure
-
-#+BEGIN_SRC clojure :session cl-to-cloj
-(defn positions
-  [pred coll]
-  (keep-indexed (fn [idx x]
-                  (when (pred x)
-                    idx))
-                coll))
-#+END_SRC
-
-#+RESULTS:
-: #'post_tonal_overtone.core/positions
-
-#+BEGIN_SRC clojure :session cl-to-cloj
-(positions #(= % 10) '(0 100 10 1000 10 100000))
-#+END_SRC
-
-#+RESULTS:
-| 2 | 4 |
 
 * prime-form utilities
 ** rotate
@@ -2062,7 +2145,7 @@ http://composertools.com/Tools/PCSets/desc_alg.html
 #+RESULTS:
 | 0 | 1 | 3 | 7 | 8 |
 
-** multiset-forte-primeA--called once by IMSET-DECISION-MAKER; used as a "database"
+** [#A] cl: multiset-forte-primeA--called once by IMSET-DECISION-MAKER; used as a "database"
 *** detailed explanation, part of imset-decision-maker
 Becuase of how multiset-forte-primeA is called within the context of
 imset-decision-maker, it expects to receive its argument already
@@ -2074,7 +2157,7 @@ It's argument will be the first (multi)set produced by a long chain of
 functions on the given paired list.
 
 Here's that chain made explicit.
-
+*** a--the list of paired X and transposed Y
 #+BEGIN_SRC lisp :session cl-to-cloj
 (let ((paired-list (list '(0 1) '(0 1 2))))
 (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list))))
@@ -2093,7 +2176,7 @@ Here's that chain made explicit.
 | (0 1) | (9 10 11) |
 | (0 1) | (10 11 0) |
 | (0 1) | (11 0 1)  |
-
+*** d--the appended lists of forward and backward lewin vectors
 This one take a long time, hmm?
 #+BEGIN_SRC lisp :session cl-to-cloj
 (let* ((paired-list (list '(0 1) '(0 1 2)))
@@ -2128,8 +2211,7 @@ This one take a long time, hmm?
 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-
-
+*** e--the straus profile over those lewin vectors (result of clean-profile)
 #+BEGIN_SRC lisp :session cl-to-cloj
 (let* ((paired-list (list '(0 1) '(0 1 2)))
        (b (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))))
@@ -2164,7 +2246,7 @@ This one take a long time, hmm?
 | 1 | 2 |  2 |  3 |  3 |  4 |
 | 0 | 1 |  1 |  2 |  2 |  3 |
 | 0 | 0 |  1 |  1 |  2 | 11 |
-
+*** f--selected multiset prime (based on forte-prime form)
 #+BEGIN_SRC lisp :session cl-to-cloj
 (let* ((paired-list (list '(0 1) '(0 1 2)))
        (b (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))))
@@ -2178,7 +2260,7 @@ This one take a long time, hmm?
 #+RESULTS:
 | 0 | 1 | 2 | 3 |
 
-*** cl
+*** cl code and called example
 
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-primeA (mset)
@@ -2195,7 +2277,7 @@ This one take a long time, hmm?
 #+RESULTS:
 | 0 | 1 | 2 | 3 |
 
-*** clj
+*** clj code and called example--use distinct in place of remove-dup
 
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn multiset-forte-primeA [mset]
@@ -2247,60 +2329,131 @@ with a whole list of lists for a reason?
 
 #+RESULTS:
 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 9 | 10 |
-** [#B] wrap-vectors--never called
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun wrap-vectors (ordered-set)
-  (mapcar #'prime-vector (all-rotations ordered-set)))
- #+END_SRC
-
- #+RESULTS:
- : WRAP-VECTORS
-
-#+BEGIN_SRC lisp :session cl-to-cloj
-
+** [#A] clj: multiset-forte-prime steps
+*** a1--too much nesting
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 1) '(0 1 2))]
+  (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list))))
 #+END_SRC
 
-** [#B] Ainvert-mod12-pcset--called only by a never-called function 
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun Ainvert-mod12-pcset (pcset)
- (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
- #+END_SRC
+#+RESULTS:
+| ((0 1) (0 1 3))   | ((0 1) (1 2 4))  |
+| ((0 1) (2 3 5))   | ((0 1) (3 4 6))  |
+| ((0 1) (4 5 7))   | ((0 1) (5 6 8))  |
+| ((0 1) (6 7 9))   | ((0 1) (7 8 10)) |
+| ((0 1) (8 9 11))  | ((0 1) (9 10 0)) |
+| ((0 1) (10 11 1)) | ((0 1) (11 0 2)) |
+*** a2--fine nesting
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 1) '(0 1 2))]
+  (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+#+END_SRC
 
- #+RESULTS:
- : AINVERT-MOD12-PCSET
+#+RESULTS:
+| (0 1) | (0 1 2)   |
+| (0 1) | (1 2 3)   |
+| (0 1) | (2 3 4)   |
+| (0 1) | (3 4 5)   |
+| (0 1) | (4 5 6)   |
+| (0 1) | (5 6 7)   |
+| (0 1) | (6 7 8)   |
+| (0 1) | (7 8 9)   |
+| (0 1) | (8 9 10)  |
+| (0 1) | (9 10 11) |
+| (0 1) | (10 11 0) |
+| (0 1) | (11 0 1)  |
+| (0 1) | (0 1 2)   |
 
-** [#B] find-set-inversion--never called
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun find-set-inversion (pcset)
-  (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
- #+END_SRC
+*** d--did not need make-pairs-from-list used in original
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 1) '(0 1 2))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)]
+  d)
+#+END_SRC
 
- #+RESULTS:
- : FIND-SET-INVERSION
+#+RESULTS:
+| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 |
+| 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 |
+| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
-** [#B] forte-prime--only called by multiset-forte-prime, which goes uncalled
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun forte-prime (pcset)
-  (let ((a (forte-decision pcset)))
-    (if (every #'<= (car a) (cadr a))
-	(car a)
-	(cadr a))))
- #+END_SRC
+*** e
 
-** [#B] multiset-forte-prime--goes uncalled
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun multiset-forte-prime (mset)
- (forte-prime (remove-duplicates mset)))
- #+END_SRC
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 1) '(0 1 2))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)]
+e)
+#+END_SRC
 
-** [#B] multiset-forte-decision--goes uncalled
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun multiset-forte-decision (mset)
-  (forte-decision (remove-duplicates mset)))
- #+END_SRC
+#+RESULTS:
+| 0 | 0 |  1 |  1 |  2 | 11 |
+| 0 | 1 |  1 |  2 |  2 |  3 |
+| 1 | 2 |  2 |  3 |  3 |  4 |
+| 2 | 3 |  3 |  4 |  4 |  5 |
+| 3 | 4 |  4 |  5 |  5 |  6 |
+| 4 | 5 |  5 |  6 |  6 |  7 |
+| 5 | 6 |  6 |  7 |  7 |  8 |
+| 6 | 7 |  7 |  8 |  8 |  9 |
+| 7 | 8 |  8 |  9 |  9 | 10 |
+| 8 | 9 |  9 | 10 | 10 | 11 |
+| 0 | 9 | 10 | 10 | 11 | 11 |
+| 0 | 0 |  1 | 10 | 11 | 11 |
+| 0 | 0 |  1 |  1 |  2 | 11 |
+| 0 | 0 |  1 |  1 |  2 | 11 |
+| 0 | 0 |  1 | 10 | 11 | 11 |
+| 0 | 9 | 10 | 10 | 11 | 11 |
+| 8 | 9 |  9 | 10 | 10 | 11 |
+| 7 | 8 |  8 |  9 |  9 | 10 |
+| 6 | 7 |  7 |  8 |  8 |  9 |
+| 5 | 6 |  6 |  7 |  7 |  8 |
+| 4 | 5 |  5 |  6 |  6 |  7 |
+| 3 | 4 |  4 |  5 |  5 |  6 |
+| 2 | 3 |  3 |  4 |  4 |  5 |
+| 1 | 2 |  2 |  3 |  3 |  4 |
+| 0 | 1 |  1 |  2 |  2 |  3 |
+| 0 | 0 |  1 |  1 |  2 | 11 |
 
- #+RESULTS:
- : MULTISET-FORTE-DECISION
+*** f
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 1) '(0 1 2))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))]
+f)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
 
 * full documentation separated out for imset-decision-maker
 ** cl definition
@@ -2338,30 +2491,80 @@ with a whole list of lists for a reason?
 #+RESULTS:
 | 0 | 1 | 1 | 2 | 3 | 4 |
 ** clj naive definition
-
+*** code
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn imset-decision-maker [paired-list]
-  (let* (
-	 (a (make-pairs-from-list 
+  (let (
+	 a (make-pairs-from-list 
 	     (set-up-Tn-equivalent-Ys-with-X (first paired-list) 
 					     (second paired-list))))
-	 (b (map createA-lewin-vector a))
-	 (c (map reverse b))
-	 (d (append b c))
-	 (e (map clean-profile d)) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
-	 (f (multiset-forte-primeA (car e))) ; car because only need check the first one as they
+	 b (map createA-lewin-vector a)
+	 c (map reverse b)
+	 d (append b c)
+	 e (map clean-profile d) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
+	 f (multiset-forte-primeA (car e)) ; car because only need check the first one as they
 					; all will represent the same forteprime (why, again?)
-	 (g (map remove-duplicates e))
-	 (h (locate f g))
-	 (i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output
-	       collect (nth (1- idx) e))) ;locate is not zero-indexed apparently
-	 (j (remove-duplicates i :test equal)))
+	 g (map remove-duplicates e)
+	 h (locate f g)
+	 i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output--why this choice?
+	       collect (nth (1- idx) e)) ;locate is not zero-indexed; lookup in straus profile
+	 j (remove-duplicates i :test equal)
     (if (<= (length j) 2)
 	(if (every <= (car j) (cadr j))
 	    (car j)
 	    (cadr j))
 	(locating j))))
 #+END_SRC
+
+*** functioning up till f
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 1) '(0 1 2))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))]
+f)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
+
+*** g--call distinct
+
+**** (0 1) (0 1 2)
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 1) '(0 1 2))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (distinct f)]
+g)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
+
+**** (0 2 4) (0 2 6)
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 2 4) '(0 2 6))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (distinct f)]
+g)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 2 | 4 | 6 | 8 | 10 |
+
 * miscellaneous documentation
 ** streamlined documentation
 #+BEGIN_SRC lisp :session cl-to-cloj
@@ -2503,8 +2706,7 @@ with a whole list of lists for a reason?
 	(locating j))
 #+END_SRC
 
-
-** locate is uncalled??
+** map-locate is uncalled??
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun map-locate (loli)
   (let ((full-list loli))
@@ -2693,3 +2895,58 @@ need to be documented. The proverbial corner cases...
 
 
 #+END_SRC
+* uncalled prime form functions
+** [#B] wrap-vectors--never called
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun wrap-vectors (ordered-set)
+  (mapcar #'prime-vector (all-rotations ordered-set)))
+ #+END_SRC
+
+ #+RESULTS:
+ : WRAP-VECTORS
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+
+#+END_SRC
+
+** [#B] Ainvert-mod12-pcset--called only by a never-called function 
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun Ainvert-mod12-pcset (pcset)
+ (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
+ #+END_SRC
+
+ #+RESULTS:
+ : AINVERT-MOD12-PCSET
+
+** [#B] find-set-inversion--never called
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun find-set-inversion (pcset)
+  (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
+ #+END_SRC
+
+ #+RESULTS:
+ : FIND-SET-INVERSION
+
+** [#B] forte-prime--only called by multiset-forte-prime, which goes uncalled
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun forte-prime (pcset)
+  (let ((a (forte-decision pcset)))
+    (if (every #'<= (car a) (cadr a))
+	(car a)
+	(cadr a))))
+ #+END_SRC
+
+** [#B] multiset-forte-prime--goes uncalled
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun multiset-forte-prime (mset)
+ (forte-prime (remove-duplicates mset)))
+ #+END_SRC
+
+** [#B] multiset-forte-decision--goes uncalled
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun multiset-forte-decision (mset)
+  (forte-decision (remove-duplicates mset)))
+ #+END_SRC
+
+ #+RESULTS:
+ : MULTISET-FORTE-DECISION
