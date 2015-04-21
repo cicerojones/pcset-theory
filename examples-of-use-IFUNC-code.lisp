@@ -41,11 +41,13 @@
 ((0 1 2) (0 1 2) (0 1 2) (0 4) (0 1 2) (0 1 2 4 6))
 
 
-;; name of this function changed to the more descriptive:
-;; set-up-Tn-equivalent-Ys-with-X
+;; this function was refactored, its name changing to the more
+;; descriptive: set-up-Tn-equivalent-Ys-with-X
 (set-up-all '(0 1))
 (subseq (set-up-all '(0 1)) 0 21)
-((0 1) (0 1) (0 1) (0 2) (0 1) (0 3) (0 1) (0 4) (0 1) (0 5) (0 1) (0 6) (0 1) (0 1 2) (0 1) (0 1 3) (0 1) (0 2 3) (0 1) (0 1 4) (0 1)) 
+((0 1) (0 1) (0 1) (0 2) (0 1) (0 3) (0 1) (0 4) (0 1) (0 5) (0 1) (0 6) (0 1) (0 1 2) (0 1) (0 1 3) (0 1) (0 2 3) (0 1) (0 1 4) (0 1)
+
+(set-up-tn-equivalent-ys-with-x '(0 1) '(0 1 3))) 
 
 (set-up-allA)
 (subseq (set-up-allA '(0 1)) 0 21)

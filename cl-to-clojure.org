@@ -680,13 +680,50 @@ construct those some other way?
 #+RESULTS:
 : ((0 0) (0 1) (0 2) (0 3) (0 4) (0 5) (1 1) (1 2) (1 3) (1 4) (1 5) (2 2) (2 3) (2 4) (2 5) (3 3) (3 4) (3 5) (4 4) (4 5) (5 5))
 
-** 
+** set-up-Tn-equivalent-Ys-with-X
+
+*** cl
+This bad-boy will eventually be dealing with massive state. Let's see
+an example?
+
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-up-Tn-equivalent-Ys-with-X (pcset1 pcset2)
   (set-up pcset1 (car (tni-all (list pcset2)))))
  #+END_SRC
 
+ #+RESULTS:
+ : SET-UP-TN-EQUIVALENT-YS-WITH-X
 
+Produces pairs of set1 and transposed versions of set2
+#+BEGIN_SRC lisp :session cl-to-cloj
+(set-up-tn-equivalent-ys-with-x '(0 1) '(0 1 3))
+#+END_SRC
+
+#+RESULTS:
+|  0 |  1 |    |
+|  0 |  1 |  3 |
+|  0 |  1 |    |
+|  1 |  2 |  4 |
+|  0 |  1 |    |
+|  2 |  3 |  5 |
+|  0 |  1 |    |
+|  3 |  4 |  6 |
+|  0 |  1 |    |
+|  4 |  5 |  7 |
+|  0 |  1 |    |
+|  5 |  6 |  8 |
+|  0 |  1 |    |
+|  6 |  7 |  9 |
+|  0 |  1 |    |
+|  7 |  8 | 10 |
+|  0 |  1 |    |
+|  8 |  9 | 11 |
+|  0 |  1 |    |
+|  9 | 10 |  0 |
+|  0 |  1 |    |
+| 10 | 11 |  1 |
+|  0 |  1 |    |
+| 11 |  0 |  2 |
 
 
 
