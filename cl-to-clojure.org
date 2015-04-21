@@ -1350,7 +1350,13 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
     (nth (1- (cadr (locate (car chart) (cadr chart)))) mset-list)))
  #+END_SRC
 
-** locate
+** locate--called once prominently, a kind of database lookup
+
+*** 
+*** cl--finds the occurrence of a value at a certain place in a list
+
+why does this return the value that was searched for as well as the
+location? Some peculiarity of where it is called?
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun locate (x lat)
   (let ((newlat (reverse lat)))
@@ -1363,6 +1369,39 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
       (cons x (reverse (rec x newlat))))))
  #+END_SRC
 
+ #+RESULTS:
+ : LOCATE
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(locate 10 '(0 100 10 1000 10 100000))
+#+END_SRC
+
+#+RESULTS:
+| 10 | 3 | 5 |
+*** clj--can use keep-indexed
+taken from SO discussions about indices and finding
+http://stackoverflow.com/questions/4830900/how-do-i-find-the-index-of-an-item-in-a-vector
+http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-predicate-in-clojure
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn positions
+  [pred coll]
+  (keep-indexed (fn [idx x]
+                  (when (pred x)
+                    idx))
+                coll))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/positions
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(positions #(= % 10) '(0 100 10 1000 10 100000))
+#+END_SRC
+
+#+RESULTS:
+| 2 | 4 |
+
 * prime-form utilities
 ** rotate
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1372,7 +1411,22 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
       (nconc (subseq list count) (subseq list 0 count))))
  #+END_SRC
 
+ #+RESULTS:
+ : ROTATE
 
+1. rotate
+2. my-rotate
+3. all-rotations
+4. wrap-vectors--uncalled
+   1. find-prime-form
+   2. forte-decision
+   3. forte-primeA
+   4. multiset-forte-primeA
+   5. imset-decision-maker
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+
+#+END_SRC
 ** my-rotate
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun my-rotate (lst)
@@ -1385,12 +1439,18 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
       (rec lst n))))
  #+END_SRC
 
+ #+RESULTS:
+ : MY-ROTATE
+
 
 ** all-rotations
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun all-rotations (lst)
   (butlast (de-nestC (my-rotate lst))))
  #+END_SRC
+
+ #+RESULTS:
+ : ALL-ROTATIONS
 
 
 ** mod12math
@@ -1399,6 +1459,9 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
   (cond ((<= less more) (- more less))
 	(t (- (+ 12 more) less))))
  #+END_SRC
+
+ #+RESULTS:
+ : MOD12MATH
 
 
 ** primer
@@ -1409,6 +1472,9 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 		 (primer (butlast ordered-set))))))
  #+END_SRC
 
+ #+RESULTS:
+ : PRIMER
+
 
 ** prime-vector
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1417,12 +1483,18 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
     (cons (car basic-vector) (butlast (reverse (butlast basic-vector))))))
  #+END_SRC
 
+ #+RESULTS:
+ : PRIME-VECTOR
+
 
 ** wrap-vectors
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun wrap-vectors (ordered-set)
   (mapcar #'prime-vector (all-rotations ordered-set)))
  #+END_SRC
+
+ #+RESULTS:
+ : WRAP-VECTORS
 
 
 ** list-to-integer
@@ -1437,6 +1509,9 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
       (rec lst-of-ints high-exp))))
  #+END_SRC
 
+ #+RESULTS:
+ : LIST-TO-INTEGER
+
 
 ** find-prime-form-from-list
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1446,6 +1521,9 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 	 (c (mapcar #'list-to-integer b)))
     (nth (position (apply #'min c) c) a)))
  #+END_SRC
+
+ #+RESULTS:
+ : FIND-PRIME-FORM-FROM-LIST
 
 
 ** set-to-zero
@@ -1458,12 +1536,18 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 	    ordered-pcset)))
  #+END_SRC
 
+ #+RESULTS:
+ : SET-TO-ZERO
+
 
 ** invert-mod12-pcset
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun invert-mod12-pcset (pcset)
  (sort (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))) #'<))
  #+END_SRC
+
+ #+RESULTS:
+ : INVERT-MOD12-PCSET
 
 
 ** Ainvert-mod12-pcset
@@ -1472,12 +1556,18 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
  #+END_SRC
 
+ #+RESULTS:
+ : AINVERT-MOD12-PCSET
+
 
 ** find-set-inversion
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun find-set-inversion (pcset)
   (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
  #+END_SRC
+
+ #+RESULTS:
+ : FIND-SET-INVERSION
 
 
 ** forte-decision--called by forte primeA
@@ -1487,12 +1577,18 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
     (list a (set-to-zero (find-prime-form-from-list (invert-mod12-pcset a))))))
  #+END_SRC
 
+ #+RESULTS:
+ : FORTE-DECISION
+
 ** forte-primeA--called by multiset version
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-primeA (pcset)
   (let ((a (forte-decision pcset)))
     (another-forte (car a) (cadr a))))
  #+END_SRC
+
+ #+RESULTS:
+ : FORTE-PRIMEA
 
 ** another-forte--called by forte primeA
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1505,6 +1601,9 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 		     (t (rec (cdr set1) (cdr set2))))))
       (rec a b))))
  #+END_SRC
+
+ #+RESULTS:
+ : ANOTHER-FORTE
 
 
  ;; (defun 24create (paired-list)
@@ -1527,6 +1626,9 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 (defun multiset-forte-primeA (mset)
  (forte-primeA (remove-duplicates mset)))
  #+END_SRC
+
+ #+RESULTS:
+ : MULTISET-FORTE-PRIMEA
 
 ** [#B] forte-prime--only called by multiset-forte-prime, which goes uncalled
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1553,7 +1655,6 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  : MULTISET-FORTE-DECISION
 
 * full documentation separated out for imset-decision-maker
-
 ** streamlined documentation
 #+BEGIN_SRC lisp :session cl-to-cloj
 (defun imset-decision-maker (paired-list)
@@ -1697,8 +1798,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 
 
 
-
-** 
+** locate is uncalled??
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun map-locate (loli)
   (let ((full-list loli))
@@ -1710,3 +1810,176 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
+** massive full unexpurgated function composition--up to comparing length of results
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(length
+ (remove-duplicates
+  (loop for idx in
+       (cdr (locate
+	     (multiset-forte-primeA
+	      (car (mapcar #'clean-profile
+			   (append
+			    (mapcar #'createA-lewin-vector
+				    (make-pairs-from-list 
+				     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+								     '(0 2))))
+			    (mapcar #'reverse
+				    (mapcar #'createA-lewin-vector
+					    (make-pairs-from-list 
+					     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+									     '(0 2)))))))))
+	     (mapcar #'remove-duplicates
+		     (mapcar #'clean-profile
+			     (append  (mapcar #'createA-lewin-vector
+					      (make-pairs-from-list 
+					       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+									       '(0 2))))
+				      (mapcar #'reverse
+					      (mapcar #'createA-lewin-vector
+						      (make-pairs-from-list 
+						       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										       '(0 2))))))))))
+     collect (nth (1- idx)
+		  (mapcar #'clean-profile
+			  (append  (mapcar #'createA-lewin-vector
+					   (make-pairs-from-list 
+					    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+									    '(0 2))))
+				   (mapcar #'reverse
+					   (mapcar #'createA-lewin-vector
+						   (make-pairs-from-list 
+						    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										    '(0 2)))))))) ) :test #'equal))
+;; 1
+
+(remove-duplicates (loop for idx in (cdr (locate (multiset-forte-primeA (car (mapcar #'clean-profile
+										     (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+															      (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																			      '(0 2))))
+											      (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+																		(set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																						'(0 2)))))))))
+						 (mapcar #'remove-duplicates
+							 (mapcar #'clean-profile
+								 (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+													  (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																	  '(0 2))))
+									  (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+															    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																			    '(0 2))))))))))
+		      collect (nth (1- idx) (mapcar #'clean-profile
+						    (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+											     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+															     '(0 2))))
+							     (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+													       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																	       '(0 2)))))))) ) :test #'equal)
+
+;; ((0 1 2 3))
+
+(loop for idx in (cdr (locate (multiset-forte-primeA (car (mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))))
+	(mapcar #'remove-duplicates
+	(mapcar #'clean-profile
+		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+											 '(0 2))))
+			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													   '(0 2))))))))))
+   collect (nth (1- idx) (mapcar #'clean-profile
+				 (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									  (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													  '(0 2))))
+					  (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+											    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+															    '(0 2)))))))) )
+
+;; ((0 1 2 3) (0 1 2 3))
+
+(locate (multiset-forte-primeA (car (mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))))
+	(mapcar #'remove-duplicates
+	(mapcar #'clean-profile
+		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+											 '(0 2))))
+			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													   '(0 2)))))))))
+
+;; ((0 1 2 3) 2 22)
+
+(mapcar #'remove-duplicates
+	(mapcar #'clean-profile
+		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+											 '(0 2))))
+			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													   '(0 2))))))))
+
+;; ((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11))
+
+(multiset-forte-primeA (car (mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))))
+
+;; (0 1 2 3)
+
+(mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))
+;; ((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11))
+
+(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2))))
+	 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2))))))
+;;((1 1 1 0 0 0 0 0 0 0 0 1) (1 1 1 1 0 0 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 0 0 1 1 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (1 1 0 0 0 0 0 0 0 0 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (0 0 0 0 0 0 0 0 1 1 1 1) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (1 1 1 1 0 0 0 0 0 0 0 0) (1 1 1 0 0 0 0 0 0 0 0 1) (1 1 0 0 0 0 0 0 0 0 1 1))
+
+(mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2)))))
+
+;;((1 0 0 0 0 0 0 0 0 1 1 1) (0 0 0 0 0 0 0 0 1 1 1 1) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (1 1 1 1 0 0 0 0 0 0 0 0) (1 1 1 0 0 0 0 0 0 0 0 1) (1 1 0 0 0 0 0 0 0 0 1 1))
+
+(mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2))))
+
+;;((1 1 1 0 0 0 0 0 0 0 0 1) (1 1 1 1 0 0 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 0 0 1 1 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (1 1 0 0 0 0 0 0 0 0 1 1))
+
+(make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2)))
+
+;;(((0 1) (0 2)) ((0 1) (1 3)) ((0 1) (2 4)) ((0 1) (3 5)) ((0 1) (4 6)) ((0 1) (5 7)) ((0 1) (6 8)) ((0 1) (7 9)) ((0 1) (8 10)) ((0 1) (9 11)) ((0 1) (10 0)) ((0 1) (11 1)))
+
+(set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))
+;; ((0 1) (0 2) (0 1) (1 3) (0 1) (2 4) (0 1) (3 5) (0 1) (4 6) (0 1) (5 7) (0 1) (6 8) (0 1) (7 9) (0 1) (8 10) (0 1) (9 11) (0 1) (10 0) (0 1) (11 1))
+
+
+
+#+END_SRC

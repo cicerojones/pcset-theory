@@ -398,7 +398,7 @@ conjoining every two elements"
 ;; should be adjusted to use global of choice
 
 
-
+;; uncalled
 (defun map-locate (loli)
   (let ((full-list loli))
    (labels ((hmm (rec-loli)
