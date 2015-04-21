@@ -231,6 +231,32 @@
 #+RESULTS:
 : {3 1, 1 1, 2 2, 0 7, 4 1}
 
+*** clj--dealing with frequencies
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [v [3 1 2 0 2 4 0 0 0 0 0 0]]
+                            (for [n (range 11)]
+                              (get (frequencies v ) n 0)))
+#+END_SRC
+
+#+RESULTS:
+| 7 | 1 | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn counting [v]
+  (for [n (range 11)]
+    (get (frequencies v ) n 0)))
+#+END_SRC  
+
+#+RESULTS:
+: #'post_tonal_overtone.core/counting
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(counting '(3 1 2 0 2 4 0 0 0 0 0 0))
+#+END_SRC
+
+#+RESULTS:
+| 7 | 1 | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+
 ** repeat elements
 *** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -873,13 +899,39 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 1 |  0 | 11 |
 | 3 |  2 |  1 |
 
-* begin creating named data structures for sets
+* wrap various functions from above
 ** create-lewin-vector
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-lewin-vector (set1 set2)
   (counting (flatten (rec-do-pc-compari set1 set2))))
  #+END_SRC
 
+ #+RESULTS:
+ : CREATE-LEWIN-VECTOR
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(create-lewin-vector '(0 1) '(0 2))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+*** clj
+ #+BEGIN_SRC clojure :session cl-to-cloj
+(defn create-lewin-vector [set1 set2]
+  (counting (flatten (rec-do-pc-compari set1 set2))))
+ #+END_SRC
+
+ #+RESULTS:
+ : #'post_tonal_overtone.core/create-lewin-vector
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(create-lewin-vector '(0 1) '(0 2))
+#+END_SRC
+
+#+RESULTS:
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ** create-straus-profile
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -943,7 +995,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
     (mapcar #'create-Astraus-profile a)))
  #+END_SRC
 
-
+* set searching
 ** looking
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun looking (mset)
@@ -982,7 +1034,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
       (cons x (reverse (rec x newlat))))))
  #+END_SRC
 
-
+* prime-form utilities
 ** rotate
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun rotate (list count)
@@ -1173,7 +1225,6 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 (defun multiset-forte-decision (mset)
   (forte-decision (remove-duplicates mset)))
  #+END_SRC
-
 
 * full documentation separated out for imset-decision-maker
 
