@@ -873,21 +873,22 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 1 |  0 | 11 |
 | 3 |  2 |  1 |
 
-** 
+* begin creating named data structures for sets
+** create-lewin-vector
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-lewin-vector (set1 set2)
   (counting (flatten (rec-do-pc-compari set1 set2))))
  #+END_SRC
 
 
-** 
+** create-straus-profile
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-straus-profile (set1 set2)
   (clean-profile (create-lewin-vector set1 set2)))
  #+END_SRC
 
 
-** 
+** create-12-straus-profiles
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12-straus-profiles (set1 set2)
   (let ((a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))))
@@ -897,7 +898,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** create-12-lewin-vectors
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12-lewin-vectors (set1 set2)
   (let ((a (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X set1 set2))))
@@ -907,14 +908,14 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** createA-lewin-vector
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun createA-lewin-vector (paired-set)
   (counting (flatten (rec-do-pc-compari (car paired-set) (cadr paired-set)))))
  #+END_SRC
 
 
-** 
+** create-24-lewin-vectors
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-24-lewin-vectors (paired-list)
   (let* ((a (make-pairs-from-list 
@@ -926,14 +927,14 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** create-Astraus-profile
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-Astraus-profile (paired-list)
   (clean-profile (createA-lewin-vector paired-list)))
  #+END_SRC
 
 
-** 
+** create-12A-straus-profiles
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun create-12A-straus-profiles (paired-list)
   (let ((a (make-pairs-from-list 
@@ -943,7 +944,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** looking
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun looking (mset)
   (cond ((null mset) ())
@@ -952,7 +953,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** comparing
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun comparing (mset-list)
   (let ((canon (mapcar #'list-to-integer (mapcar #'looking mset-list))))
@@ -960,7 +961,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** locating
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun locating (mset-list)
   (let ((chart (comparing mset-list)))
@@ -968,7 +969,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** locate
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun locate (x lat)
   (let ((newlat (reverse lat)))
@@ -982,7 +983,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** rotate
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun rotate (list count)
   (if (minusp count)
@@ -991,7 +992,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** my-rotate
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun my-rotate (lst)
   (let ((n (length lst)))
@@ -1004,14 +1005,14 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** all-rotations
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun all-rotations (lst)
   (butlast (de-nestC (my-rotate lst))))
  #+END_SRC
 
 
-** 
+** mod12math
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun mod12math (less more)
   (cond ((<= less more) (- more less))
@@ -1019,7 +1020,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** primer
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun primer (ordered-set)
   (cond ((null ordered-set) ())
@@ -1028,7 +1029,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** prime-vector
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun prime-vector (ordered-set)
   (let ((basic-vector (primer ordered-set)))
@@ -1036,14 +1037,14 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** wrap-vectors
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun wrap-vectors (ordered-set)
   (mapcar #'prime-vector (all-rotations ordered-set)))
  #+END_SRC
 
 
-** 
+** list-to-integer
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun list-to-integer (lst-of-ints)
   (let ((high-exp (length lst-of-ints)))
@@ -1056,7 +1057,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** find-prime-form-from-list
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun find-prime-form-from-list (ordered-pcset)
   (let* ((a (all-rotations ordered-pcset))
@@ -1066,7 +1067,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** set-to-zero
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun set-to-zero (ordered-pcset)
   (let ((n (car ordered-pcset)))
@@ -1077,28 +1078,28 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** invert-mod12-pcset
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun invert-mod12-pcset (pcset)
  (sort (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))) #'<))
  #+END_SRC
 
 
-** 
+** Ainvert-mod12-pcset
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun Ainvert-mod12-pcset (pcset)
  (mapcan #'mod12 (list (mapcar #'(lambda (x) (- 12 x)) pcset))))
  #+END_SRC
 
 
-** 
+** find-set-inversion
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun find-set-inversion (pcset)
   (set-to-zero (reverse (Ainvert-mod12-pcset pcset))))
  #+END_SRC
 
 
-** 
+** forte-decision
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-decision (pcset)
   (let ((a (set-to-zero (find-prime-form-from-list pcset))))
@@ -1106,7 +1107,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** forte-prime
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-prime (pcset)
   (let ((a (forte-decision pcset)))
@@ -1116,7 +1117,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** forte-primeA
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-primeA (pcset)
   (let ((a (forte-decision pcset)))
@@ -1124,7 +1125,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  #+END_SRC
 
 
-** 
+** another-forte
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun another-forte (setx sety)
   (let ((a setx) (b sety))
@@ -1153,21 +1154,21 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
  ;; them? quote unquote.
 
 
-** 
+** multiset-forte-primeA
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-primeA (mset)
  (forte-primeA (remove-duplicates mset)))
  #+END_SRC
 
 
-** 
+** multiset-forte-prime
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-prime (mset)
  (forte-prime (remove-duplicates mset)))
  #+END_SRC
 
 
-** 
+** multiset-forte-decision
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun multiset-forte-decision (mset)
   (forte-decision (remove-duplicates mset)))
