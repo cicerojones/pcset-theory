@@ -117,9 +117,6 @@ conjoining every two elements"
   (set-up pcset1 (car (tni-all (list pcset2)))))
 
 
-
-
-
 (defun pc-compari (n1 n2)
   (cond ((<= n1 n2)
 	 (cond ((= n1 n2) 0)
@@ -309,9 +306,11 @@ conjoining every two elements"
 (defun multiset-forte-primeA (mset)
  (forte-primeA (remove-duplicates mset)))
 
+;; um, uncalled?
 (defun multiset-forte-prime (mset)
  (forte-prime (remove-duplicates mset)))
 
+;; also uncalled?
 (defun multiset-forte-decision (mset)
   (forte-decision (remove-duplicates mset)))
 

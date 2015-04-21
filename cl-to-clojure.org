@@ -305,129 +305,232 @@
  #+RESULTS:
  | (0 0 0 0 0 0 0) | (1) | (2 2) | (3) | (4) | NIL | NIL | NIL | NIL | NIL | NIL | NIL |
 
-*** clj									:clj:
+*** clj--trying to get around writing 12-profile 			:clj:
 **** contains? is best on maps, not lists or vectors
 http://clojuredocs.org/clojure.core/contains_q
 
 ** [#A] "clean profile" flattens and removes nill
-*** understanding what clean profile is doing
-**** produce all intervals between two pcsets--rec-do-compari
-#+BEGIN_SRC lisp :session cl-to-cloj
-(flatten (rec-do-pc-compari '(0 1) '(0 1 2)))
-
-#+END_SRC
-
-#+RESULTS:
-| 0 | 11 | 1 | 0 | 2 | 1 |
-
-**** count up the appearances of the 12 pitch classes in that multiset--lewin
-#+BEGIN_SRC lisp
-(counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2))))
-#+END_SRC
-
-#+RESULTS:
-| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-
-#+BEGIN_SRC clojure
-(counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2))))
-#+END_SRC
-
-#+RESULTS:
-| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-
-#+BEGIN_SRC lisp :session cl-to-cloj
-
-#+END_SRC  
-
-**** create-lewin-vector simply WRAPS counting--flatten--rec-do-pc-compari
-#+BEGIN_SRC lisp :session cl-to-cloj
-(defun create-lewin-vector (set1 set2)
-  (counting (flatten (rec-do-pc-compari set1 set2))))
-#+END_SRC
-
-#+RESULTS:
-: CREATE-LEWIN-VECTOR
-
-#+BEGIN_SRC lisp
-(counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2))))
-#+END_SRC
-
-#+RESULTS:
-| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-
-**** clean profile this vector == create-straus-profile
-#+BEGIN_SRC lisp
-(clean-profile (counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2)))))
-#+END_SRC
-
-#+RESULTS:
-| 0 | 0 | 1 | 1 | 2 | 11 |
-
-
-
-#+RESULTS:
-: CREATE-STRAUS-PROFILE
-
-**** clean-profile is the same as sorting the rec-do-pc-compari???
-Why did I go through all that trouble? So that I had access to a lewin
-vector if necessary?
-
-Rec-do requires two sets, whereas clean-profile works on a lewin
-vector. Is there any reason not to take the output of sorting the
-flatten rec-do-compari and passing THAT?
-#+BEGIN_SRC lisp :session cl-to-cloj
-(sort (flatten (rec-do-pc-compari '(0 1) '(0 1 2))) #'<)
-#+END_SRC
-
-#+RESULTS:
-| 0 | 0 | 1 | 1 | 2 | 11 |
-
-**** [#B] two create-straus-profiles--only called by create-12-straus, which goes uncalled
-#+BEGIN_SRC lisp :session cl-to-cloj
-(defun create-straus-profile (set1 set2)
-  (clean-profile (create-lewin-vector set1 set2)))
-
-(create-straus-profile '(0 1) '(0 1 2))
-#+END_SRC
-
-#+RESULTS:
-| 0 | 0 | 1 | 1 | 2 | 11 |
-
-I.e. create-straus-profile is:
-
-
-#+BEGIN_SRC lisp :session cl-to-cloj
-(defun create-straus-profile (set1 set2)
-  (sort (flatten (rec-do-pc-compari set1 set2)) #'<))
-
-(create-straus-profile '(0 1) '(0 1 2))
-
-#+END_SRC
-
-#+RESULTS:
-| 0 | 0 | 1 | 1 | 2 | 11 |
-
-*** cl--may be largely unnecessary?
+*** hide confusion
+**** cl code definition
+ takes a straus profile as vector as "single-vector," hence
+ "clean-profile", which gets rid of 'nulls' and flattens it down into a
+ single multiset
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun clean-profile (single-vector)
   (flatten (remove-if #'null (12-profile single-vector))))
-
+ #+END_SRC
+**** examples of use
+***** as is
+ #+BEGIN_SRC lisp :session cl-to-cloj
 (clean-profile '(0 1 1 2 3 3 3 5 7 0 10 11))
-
  #+END_SRC
 
  #+RESULTS:
  | 1 | 2 | 3 | 3 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 7 | 7 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 |
 
-*** [#A] clj?--create straus profile directly				:clj:
-never finished!
-#+BEGIN_SRC clojure :session cl-to-cloj
+***** mapcar-ed in the multiset function
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))
+ #+END_SRC
+
+ #+RESULTS:
+ | 0 | 1 |  2 | 11 |
+ | 0 | 1 |  2 |  3 |
+ | 1 | 2 |  3 |  4 |
+ | 2 | 3 |  4 |  5 |
+ | 3 | 4 |  5 |  6 |
+ | 4 | 5 |  6 |  7 |
+ | 5 | 6 |  7 |  8 |
+ | 6 | 7 |  8 |  9 |
+ | 7 | 8 |  9 | 10 |
+ | 8 | 9 | 10 | 11 |
+ | 0 | 9 | 10 | 11 |
+ | 0 | 1 | 10 | 11 |
+ | 0 | 9 | 10 | 11 |
+ | 8 | 9 | 10 | 11 |
+ | 7 | 8 |  9 | 10 |
+ | 6 | 7 |  8 |  9 |
+ | 5 | 6 |  7 |  8 |
+ | 4 | 5 |  6 |  7 |
+ | 3 | 4 |  5 |  6 |
+ | 2 | 3 |  4 |  5 |
+ | 1 | 2 |  3 |  4 |
+ | 0 | 1 |  2 |  3 |
+ | 0 | 1 |  2 | 11 |
+ | 0 | 1 | 10 | 11 |
+
+**** understanding what clean profile is doing
+***** produce all intervals between two pcsets--rec-do-compari
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(flatten (rec-do-pc-compari '(0 1) '(0 1 2)))
+
+ #+END_SRC
+
+ #+RESULTS:
+ | 0 | 11 | 1 | 0 | 2 | 1 |
+
+***** count up the appearances of the 12 pitch classes in that multiset--lewin
+****** lisp
+ #+BEGIN_SRC lisp
+(counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2))))
+ #+END_SRC
+
+ #+RESULTS:
+ | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+****** clojure
+ #+BEGIN_SRC clojure
+(counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2))))
+ #+END_SRC
+
+ #+RESULTS:
+ | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+
+ #+END_SRC  
+
+***** create-lewin-vector simply WRAPS counting--flatten--rec-do-pc-compari
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun create-lewin-vector (set1 set2)
+  (counting (flatten (rec-do-pc-compari set1 set2))))
+ #+END_SRC
+
+ #+RESULTS:
+ : CREATE-LEWIN-VECTOR
+
+ #+BEGIN_SRC lisp
+(counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2))))
+ #+END_SRC
+
+ #+RESULTS:
+ | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+***** clean profile this vector == create-straus-profile
+ #+BEGIN_SRC lisp
+(clean-profile (counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2)))))
+ #+END_SRC
+
+ #+RESULTS:
+ | 0 | 0 | 1 | 1 | 2 | 11 |
+
+
+
+ #+RESULTS:
+ : CREATE-STRAUS-PROFILE
+
+***** clean-profile is the same as sorting the rec-do-pc-compari???
+ Why did I go through all that trouble? So that I had access to a lewin
+ vector if necessary?
+
+ Rec-do requires two sets, whereas clean-profile works on a lewin
+ vector. Is there any reason not to take the output of sorting the
+ flatten rec-do-compari and passing THAT?
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(sort (flatten (rec-do-pc-compari '(0 1) '(0 1 2))) #'<)
+ #+END_SRC
+
+ #+RESULTS:
+ | 0 | 0 | 1 | 1 | 2 | 11 |
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(clean-profile '(1 1 1 0 0 0 0 0 0 0 0 1))
+ #+END_SRC
+
+ #+RESULTS:
+ | 0 | 1 | 2 | 11 |
+
+***** [#B] two create-straus-profiles--only called by create-12-straus, which goes uncalled
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun create-straus-profile (set1 set2)
+  (clean-profile (create-lewin-vector set1 set2)))
+
+(create-straus-profile '(0 1) '(0 1 2))
+ #+END_SRC
+
+ #+RESULTS:
+ | 0 | 0 | 1 | 1 | 2 | 11 |
+
+ I.e. create-straus-profile is:
+
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun create-straus-profile (set1 set2)
+  (sort (flatten (rec-do-pc-compari set1 set2)) #'<))
+
+(create-straus-profile '(0 1) '(0 1 2))
+
+ #+END_SRC
+
+ #+RESULTS:
+ | 0 | 0 | 1 | 1 | 2 | 11 |
+
+**** [#A] clj?--create straus profile directly--how?			:clj:
+ never finished!
+ #+BEGIN_SRC clojure :session cl-to-cloj
 (defn clean-profile [single-vector]
 (sort (flatten (rec-do-pc-compari ))))
+ #+END_SRC
+
+ #+RESULTS:
+ : #'post_tonal_overtone.core/clean-profile
+
+*** what clean-profile produces and how it does it
+#+BEGIN_SRC lisp :session cl-to-cloj
+(flatten (remove-if #'null (12-profile (create-lewin-vector '(0 1) '(0 1 2)))))
+#+END_SRC
+#+RESULTS:
+| 0 | 0 | 1 | 1 | 2 | 11 |
+
+*** how can you do this in clojure?
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+ (create-lewin-vector ' (0 1) ' (0 1 2))
 #+END_SRC
 
 #+RESULTS:
+| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+#+BEGIN_SRC clojure :session cl-to-cloj :results output
+(println  (let [v (create-lewin-vector '(0 1) '(0 1 2))]
+     (for [n (range 12)]
+	  (repeat (nth v n) n))))
+#+END_SRC
+#+RESULTS:
+: ((0 0) (1 1) (2) () () () () () () () () (11))
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(flatten (let [v (create-lewin-vector '(0 1) '(0 1 2))]
+     (for [n (range 12)]
+	  (repeat (nth v n) n))))
+#+END_SRC
+#+RESULTS:
+| 0 | 0 | 1 | 1 | 2 | 11 |
+
+*** like this:
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn clean-profile [single-vector]
+  (flatten (for [n (range 12)]
+             (repeat (nth single-vector n) n))))
+#+END_SRC
+#+RESULTS:
 : #'post_tonal_overtone.core/clean-profile
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(clean-profile '(0 1 1 2 3 3 3 5 7 0 10 11))
+#+END_SRC
+#+RESULTS:
+| 1 | 2 | 3 | 3 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 7 | 7 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 |
+
 
 * the ever intriguing de-nesting problem
 ** de-nesting to one level
@@ -1889,7 +1992,33 @@ Why does this add a zero?
 | 0 | 1 | 3 | 7 | 8 |
 
 ** forte-primeA--called by multiset-forte-primeA
-*** cl
+*** theory background on what forte-primeA is doing
+forte-primeA appears to take any single set of pitch-classes,
+transposed and inverted or not, and then returns a pcset, which should
+be the prime form according to the forte rules. To see the disputed
+sets in the rahn vs. forte
+
+http://www.mta.ca/faculty/arts-letters/music/pc-set_project/pc-set_new/pages/pc-table/packed.html
+
+http://composertools.com/Tools/PCSets/desc_alg.html
+
+| forte name | packed from right | packed to the left |
+|       5-20 | (01568)           | (01378)            |
+|      6-Z29 | (023679)          | (013689)           |
+|       6-31 | (014579)          | (013589)           |
+|      7-z18 | (0145679)         | (0234589)          |
+|       7-20 | (0125679)         | (0124789)          |
+|       8-26 | (0134578T)        | (0124579T)         |
+
+| Pitch Class Set | Forte Prime        | Rahn Prime         |
+|            5-20 | (0,1,3,7,8)        | (0,1,5,6,8)        |
+|           6-Z29 | (0,1,3,6,8,9)      | (0,2,3,6,7,9)      |
+|            6-31 | (0,1,3,5,8,9)      | (0,1,4,5,7,9)      |
+|            7-20 | (0,1,2,4,7,8,9)    | (0,1,2,5,6,7,9)    |
+|            8-26 | (0,1,2,4,5,7,9,10) | (0,1,3,4,5,7,8,10) |
+
+*** implementations
+**** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun forte-primeA (pcset)
   (let ((a (forte-decision pcset)))
@@ -1904,7 +2033,7 @@ Why does this add a zero?
 
 #+RESULTS:
 | 0 | 1 | 3 | 7 | 8 |
-*** clj									:clj:
+**** clj								:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn forte-primeA [pcset]
   (let [a (forte-decision pcset)]
@@ -1922,8 +2051,156 @@ Why does this add a zero?
 | 0 | 1 | 3 | 7 | 8 |
 
 ** multiset-forte-primeA--called once by IMSET-DECISION-MAKER; used as a "database"
+*** detailed explanation, part of imset-decision-maker
+Becuase of how multiset-forte-primeA is called within the context of
+imset-decision-maker, it expects to receive its argument already
+processed by clean profile. 
 
-*** hmm
+Huh? 
+
+It's argument will be the first (multi)set produced by a long chain of
+functions on the given paired list.
+
+Here's that chain made explicit.
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let ((paired-list (list '(0 1) '(0 1 2))))
+(make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list))))
+#+END_SRC
+
+#+RESULTS:
+| (0 1) | (0 1 2)   |
+| (0 1) | (1 2 3)   |
+| (0 1) | (2 3 4)   |
+| (0 1) | (3 4 5)   |
+| (0 1) | (4 5 6)   |
+| (0 1) | (5 6 7)   |
+| (0 1) | (6 7 8)   |
+| (0 1) | (7 8 9)   |
+| (0 1) | (8 9 10)  |
+| (0 1) | (9 10 11) |
+| (0 1) | (10 11 0) |
+| (0 1) | (11 0 1)  |
+
+This one take a long time, hmm?
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let* ((paired-list (list '(0 1) '(0 1 2)))
+       (b (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))))
+       (c (reverse b))
+       (d (append b c)))
+  d)
+#+END_SRC
+
+#+RESULTS:
+| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 |
+| 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 |
+| 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let* ((paired-list (list '(0 1) '(0 1 2)))
+       (b (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))))
+       (c (reverse b))
+       (d (append b c))
+       (e (mapcar #'clean-profile d)))
+  e)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 |  1 |  1 |  2 | 11 |
+| 0 | 1 |  1 |  2 |  2 |  3 |
+| 1 | 2 |  2 |  3 |  3 |  4 |
+| 2 | 3 |  3 |  4 |  4 |  5 |
+| 3 | 4 |  4 |  5 |  5 |  6 |
+| 4 | 5 |  5 |  6 |  6 |  7 |
+| 5 | 6 |  6 |  7 |  7 |  8 |
+| 6 | 7 |  7 |  8 |  8 |  9 |
+| 7 | 8 |  8 |  9 |  9 | 10 |
+| 8 | 9 |  9 | 10 | 10 | 11 |
+| 0 | 9 | 10 | 10 | 11 | 11 |
+| 0 | 0 |  1 | 10 | 11 | 11 |
+| 0 | 0 |  1 | 10 | 11 | 11 |
+| 0 | 9 | 10 | 10 | 11 | 11 |
+| 8 | 9 |  9 | 10 | 10 | 11 |
+| 7 | 8 |  8 |  9 |  9 | 10 |
+| 6 | 7 |  7 |  8 |  8 |  9 |
+| 5 | 6 |  6 |  7 |  7 |  8 |
+| 4 | 5 |  5 |  6 |  6 |  7 |
+| 3 | 4 |  4 |  5 |  5 |  6 |
+| 2 | 3 |  3 |  4 |  4 |  5 |
+| 1 | 2 |  2 |  3 |  3 |  4 |
+| 0 | 1 |  1 |  2 |  2 |  3 |
+| 0 | 0 |  1 |  1 |  2 | 11 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let* ((paired-list (list '(0 1) '(0 1 2)))
+       (b (mapcar #'createA-lewin-vector (make-pairs-from-list (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))))
+       (c (reverse b))
+       (d (append b c))
+       (e (mapcar #'clean-profile d))
+       (f (multiset-forte-primeA (first e))))
+       f)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
+
+*** cl
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(defun multiset-forte-primeA (mset)
+ (forte-primeA (remove-duplicates mset)))
+ #+END_SRC
+
+ #+RESULTS:
+ : MULTISET-FORTE-PRIMEA
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(multiset-forte-primeA '((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
+
+*** clj
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn multiset-forte-primeA [mset]
+(forte-primeA (distinct mset)))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/multiset-forte-primeA
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(multiset-forte-primeA '(0 0 1 1 2 11))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 |
+*** hide noise
+**** 
 uh, does multiset-forte-primeA really take multisets for its argument?
 Yes, call it with the results of some other ~clean-profile~ of lewin
 vectors.
@@ -1958,63 +2235,6 @@ with a whole list of lists for a reason?
 
 #+RESULTS:
 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 9 | 10 |
-
-*** cl
- #+BEGIN_SRC lisp :session cl-to-cloj
-(defun multiset-forte-primeA (mset)
- (forte-primeA (remove-duplicates mset)))
- #+END_SRC
-
- #+RESULTS:
- : MULTISET-FORTE-PRIMEA
-
-#+BEGIN_SRC lisp :session cl-to-cloj
-(multiset-forte-primeA '((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11)))
-#+END_SRC
-
-#+RESULTS:
-| 0 | 1 | 2 | 3 |
-
-*** clj
-#+BEGIN_SRC clojure :session cl-to-cloj
-(clean-profile '(0 1 1 2 3 3 3 5 6 0 10 11))
-#+END_SRC
-
-#+RESULTS:
-
-#+BEGIN_SRC clojure :session cl-to-cloj
-(defn multiset-forte-primeA [mset]
-(forte-primeA (distinct mset)))
-#+END_SRC
-
-#+RESULTS:
-: #'post_tonal_overtone.core/multiset-forte-primeA
-
-#+BEGIN_SRC clojure :session cl-to-cloj
-(distinct '((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11)))
-#+END_SRC
-
-#+RESULTS:
-| 0 | 1 |  2 | 11 |
-| 0 | 1 |  2 |  3 |
-| 1 | 2 |  3 |  4 |
-| 2 | 3 |  4 |  5 |
-| 3 | 4 |  5 |  6 |
-| 4 | 5 |  6 |  7 |
-| 5 | 6 |  7 |  8 |
-| 6 | 7 |  8 |  9 |
-| 7 | 8 |  9 | 10 |
-| 8 | 9 | 10 | 11 |
-| 0 | 9 | 10 | 11 |
-| 0 | 1 | 10 | 11 |
-
-#+BEGIN_SRC clojure :session cl-to-cloj
-(forte-primeA '((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11)))
-#+END_SRC
-
-#+RESULTS:
-
-*** 
 ** [#B] wrap-vectors--never called
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun wrap-vectors (ordered-set)
@@ -2394,6 +2614,7 @@ with a whole list of lists for a reason?
 
 ;;(((0 1) (0 2)) ((0 1) (1 3)) ((0 1) (2 4)) ((0 1) (3 5)) ((0 1) (4 6)) ((0 1) (5 7)) ((0 1) (6 8)) ((0 1) (7 9)) ((0 1) (8 10)) ((0 1) (9 11)) ((0 1) (10 0)) ((0 1) (11 1)))
 
+;;;; HUGE! Make all the pairings of two sets, X and transposed version of Y
 (set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))
 ;; ((0 1) (0 2) (0 1) (1 3) (0 1) (2 4) (0 1) (3 5) (0 1) (4 6) (0 1) (5 7) (0 1) (6 8) (0 1) (7 9) (0 1) (8 10) (0 1) (9 11) (0 1) (10 0) (0 1) (11 1))
 
