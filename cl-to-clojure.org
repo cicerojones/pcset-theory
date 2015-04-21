@@ -626,7 +626,7 @@ construct those some other way?
 #+BEGIN_SRC clojure
 (defn jack-rec [lst1 lst2]
 (letfn [(jackrec [inner-lst1 inner-lst2]
-(cond (empty? l1) acc
+(cond (empty? l1) acc)))))
 
 #+END_SRC
 
@@ -725,21 +725,108 @@ Produces pairs of set1 and transposed versions of set2
 |  0 |  1 |    |
 | 11 |  0 |  2 |
 
+*** clj
+**** clj-- produces wrong order
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn set-up-tn-equivalent-ys-with-x [pcset1 pcset2]
+ (set-up pcset1 (first (TnI-all (list pcset2)))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/set-up-tn-equivalent-ys-with-x
+
+**** requirees two steps
+#+BEGIN_SRC clojure :session cl-to-cloj
+(map reverse (partition 2 (set-up-tn-equivalent-ys-with-x '(0 1) '(0 1 3))))
+#+END_SRC
+
+#+RESULTS:
+| (0 1) | (0 1 3)   |
+| (0 1) | (1 2 4)   |
+| (0 1) | (2 3 5)   |
+| (0 1) | (3 4 6)   |
+| (0 1) | (4 5 7)   |
+| (0 1) | (5 6 8)   |
+| (0 1) | (6 7 9)   |
+| (0 1) | (7 8 10)  |
+| (0 1) | (8 9 11)  |
+| (0 1) | (9 10 0)  |
+| (0 1) | (10 11 1) |
+| (0 1) | (11 0 2)  |
+| (0 1) | (0 1 3)   |
+
+Yikes! Reversing this corrects the order but transposes the wrong chord.
+#+BEGIN_SRC clojure :session cl-to-cloj :results output
+(println (set-up-tn-equivalent-ys-with-x  '(0 1 3) '(0 1)))
+#+END_SRC
+
+#+RESULTS:
+: ((0 1) (0 1 3) (1 2) (0 1 3) (2 3) (0 1 3) (3 4) (0 1 3) (4 5) (0 1 3) (5 6) (0 1 3) (6 7) (0 1 3) (7 8) (0 1 3) (8 9) (0 1 3) (9 10) (0 1 3) (10 11) (0 1 3) (11 0) (0 1 3) (0 1) (0 1 3))
 
 
-
-** 
+** pc-compari performs some pitch-class mod12 interval arithmetic
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun pc-compari (n1 n2)
-  (cond ((<= n1 n2)
-	 (cond ((= n1 n2) 0)
-	       (t (1+ (pc-compari n1 (1- n2))))))
+  (cond ((<= n1 n2) (cond ((= n1 n2) 0)
+			  (t (1+ (pc-compari n1 (1- n2))))))
 	(t (cond ((= (mod n1 12) n2) 0)
-	       (t (1+ (pc-compari (1+ n1) n2)))))))
+		 (t (1+ (pc-compari (1+ n1) n2)))))))
  #+END_SRC
 
+ #+RESULTS:
+ : PC-COMPARI
 
-** 
+#+BEGIN_SRC lisp :session cl-to-cloj
+(pc-compari 0 11)
+#+END_SRC 
+
+#+RESULTS:
+: 11
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(pc-compari 12 0)
+#+END_SRC
+
+#+RESULTS:
+: 0
+#+BEGIN_SRC lisp :session cl-to-cloj
+(pc-compari 11 0)
+#+END_SRC
+
+#+RESULTS:
+: 1
+
+*** clj
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn pc-compari [n1 n2]
+  (cond (<= n1 n2) (cond (= n1 n2) 0
+                         :else (inc (pc-compari n1 (dec n2))))
+        :else (cond (= (mod n1 12) n2) 0
+                    :else (inc (pc-compari (inc n1) n2)))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/pc-compari
+
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(pc-compari 0 12)
+#+END_SRC
+
+#+RESULTS:
+: 12
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(pc-compari 11 0)
+#+END_SRC
+
+#+RESULTS:
+: 1
+
+** recursively do the pc-comparing
+
+*** cl
  #+BEGIN_SRC lisp :session cl-to-cloj
 (defun rec-do-pc-compari (lst1 lst2)
   (labels ((rec (x1 y1)
@@ -751,6 +838,40 @@ Produces pairs of set1 and transposed versions of set2
 		   (rec-do-pc-compari lst1 (cdr lst2)))))))
  #+END_SRC
 
+ #+RESULTS:
+ : REC-DO-PC-COMPARI
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(rec-do-pc-compari '(0 1 2) '(0 1 3))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 11 | 10 |
+| 1 |  0 | 11 |
+| 3 |  2 |  1 |
+
+*** clj
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn rec-do-pc-compari [lst1 lst2]
+  (letfn [(rec [l1 l2]
+                   (cond (empty? l1) ()
+                         :else (cons (pc-compari (first l1) (first l2))
+                                     (rec (rest l1) l2))))]
+    (cond (empty? lst2) ()
+          :else (cons (rec lst1 lst2)
+                      (rec-do-pc-compari lst1 (rest lst2))))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/rec-do-pc-compari
+#+BEGIN_SRC clojure :session cl-to-cloj
+(rec-do-pc-compari '(0 1 2) '(0 1 3))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 11 | 10 |
+| 1 |  0 | 11 |
+| 3 |  2 |  1 |
 
 ** 
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1053,84 +1174,150 @@ Produces pairs of set1 and transposed versions of set2
  #+END_SRC
 
 
-** 
- #+BEGIN_SRC lisp :session cl-to-cloj
+* full documentation separated out for imset-decision-maker
+
+** streamlined documentation
+#+BEGIN_SRC lisp :session cl-to-cloj
 (defun imset-decision-maker (paired-list)
   (let* (
+	 (a (make-pairs-from-list 
+	     (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
+					     (cadr paired-list))))
+	 (b (mapcar #'createA-lewin-vector a))
+	 (c (mapcar #'reverse b))
+	 (d (append b c))
+	 (e (mapcar #'clean-profile d)) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
+	 (f (multiset-forte-primeA (car e))) ; car because only need check the first one as they
+					; all will represent the same forteprime (why, again?)
+	 (g (mapcar #'remove-duplicates e))
+	 (h (locate f g))
+	 (i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output
+	       collect (nth (1- idx) e))) ;locate is not zero-indexed apparently
+	 (j (remove-duplicates i :test #'equal)))
+    (if (<= (length j) 2)
+	(if (every #'<= (car j) (cadr j))
+	    (car j)
+	    (cadr j))
+	(locating j))))
+#+END_SRC
+
+** broken up documentation
+#+BEGIN_SRC lisp :session cl-to-cloj
 	 ;; a is the "home-list", the foundation, providing all the
 	 ;; paired sets across the transpositional spectrum for a given
 	 ;; X-Y pair
 	 (a (make-pairs-from-list 
 	     (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
 					     (cadr paired-list))))
-	 ;; determine the IFUNC of each X-Y pair in A, where the X chord is 
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; determine the IFUNC of each X-Y pair in A, where the X chord is 
 	 ;; constant and Y is transposed by Tn for n from 0 to 11
 	 (b (mapcar #'createA-lewin-vector a))
+#+END_SRC
+#+BEGIN_SRC lisp :session cl-to-cloj	 
 	 ;; also determine the INVERSE of each IFUNC simply
 	 ;; at one time by reversing the lewin-vector
 	 ;;
 	 ;; disadvantage is that you don't get the generating pair
 	 ;; explicitly, but still a neat trick on Lewin-style vectors
+
+
 	 (c (mapcar #'reverse b))
-	 ;; make one big list that contains all these
+#+END_SRC
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; make one big list that contains all these
 	 ;; lewin-vectors. we will then use this list of 24 IFUNCS in
 	 ;; Lewin form to find the preferred prime-form according to the 
 	 ;; prime-form algorithm of choice
+
 	 (d (append b c))
-	 ;; create the analogous 24 straus-profiles
+#+END_SRC
+	 
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; create the analogous 24 straus-profiles
 	 (e (mapcar #'clean-profile d)) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
-	 ;; determine the forte prime form that the reduced
+#+END_SRC
+	 
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; determine the forte prime form that the reduced
 	 ;; straus multisets represent
 	 ;; 
 	 ;; could be replaced with Straus-Rahn algorithm if desired
 	 (f (multiset-forte-primeA (car e))) ; car because only need check the first one as they
-					     ; all will represent the same forteprime (why, again?)
-	 ;; make all imsets into sets in order to perform
+					     ; all will represent the
+	 ;; same forteprime (why, again?)
+#+END_SRC
+	 
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; make all imsets into sets in order to perform
 	 ;; some nifty LOCATE-ing maneuvers
+
 	 (g (mapcar #'remove-duplicates e))
-	 ;; find the location(s) of the forte prime in this 
+#+END_SRC
+	 
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; find the location(s) of the forte prime in this 
 	 ;; new list of sets
 	 ;;
 	 ;; NB. F is a shallow list, and contains the only the single prime-form
 	 (h (locate f g))
-	 ;; IMPORTANT: use the location of 
+#+END_SRC
+	 
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; IMPORTANT: use the location of 
 	 ;; prime-form f in the list of sets g
 	 ;; to find the generating multiset parent(s) in e
 	 ;; possible that there is MORE THAN ONE!
 	 (i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output
 	       collect (nth (1- idx) e))) ;locate is not zero-indexed apparently
-	 ;; leave only unique representatives generators of the
+#+END_SRC
+	 
+#+BEGIN_SRC lisp :session cl-to-cloj
+;; leave only unique representatives generators of the
 	 ;; forte-prime form. at max there should be two 
 	 ;;
-	 ;; NOT NECESSARILY!!! see ((0 2 4) (0 2 6))
-	 (j (remove-duplicates i :test #'equal)))
-	 ;; following code commented out because it failed to 
-	 ;; detect the prime form in the specific tricky case 
-	 ;; mentioned just above. otherwise, a hack worth
-	 ;; looking at, at least for its use of EVERY
-	 ;;
-	 ;; (if (every #'<= (car j) (cadr j))
-	 ;; 	(list 'first j)
-	 ;; 	(list 'second j))))
-	 ;;
+	 ;; NOT NECESSARILY!!! see ((0 2 4) (0 2 6)) 
+	 (j (remove-duplicates i :test #'equal))
+#+END_SRC
+	 
+#+BEGIN_SRC lisp :session cl-to-cloj
+    ;; following code commented out because it failed to 
+    ;; detect the prime form in the specific tricky case 
+    ;; mentioned just above. otherwise, a hack worth
+    ;; looking at, at least for its use of EVERY
+    ;;
+    ;; (if (every #'<= (car j) (cadr j))
+    ;; 	(list 'first j)
+    ;; 	(list 'second j))
+    ;;
 	 ;;; this alone just cannot do it.
 	 ;;; there must be a larger function for looking 
 	 ;;; within multiset families--update: that is now
 	 ;;; done by the function, LOCATING below
-	 ;; do pairwise comparisons to find the imset that 
-	 ;; most consistently is lower from left to right
-	 ;; and use LOCATING in the special case
-	 ;;
-	 ;; in compilation this won't print but use for seeing
-	 ;; step by step the process here
-	 ;;
-	 ;; (format t "~{~{~a ~%~}~%~}" (list a d e f g h i j))
-    (if (<= (length j) 2)
+#+END_SRC
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+    ;; do pairwise comparisons to find the imset that 
+    ;; most consistently is lower from left to right
+    ;; and use LOCATING in the special case
+    ;;
+    ;; in compilation this won't print but use for seeing
+    ;; step by step the process here
+    ;;
+    ;; (format t "~{~{~a ~%~}~%~}" (list a d e f g h i j))
+
+(if (<= (length j) 2)
 	(if (every #'<= (car j) (cadr j))
 	    (car j)
 	    (cadr j))
-	(locating j))))
- #+END_SRC
+	(locating j))
+#+END_SRC
+
+
+
 
 
 ** 
