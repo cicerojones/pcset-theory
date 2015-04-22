@@ -923,4 +923,294 @@ NIL
 NIL
 
 (let ((a '(0 2 6)) (b '(0 3 7)))
-  (format t "~{~a ~a ~%~{~{~15a~}~%~}~}" (list a b (sort (embed-orzo-sums-with-straus-profiles '(0 1 3) '(0 1 4)) #'< :key #'car))))
+  (format t "~{~a ~a ~%~{~{~15a~}~%~}~}" (list a b (sort
+  (embed-orzo-sums-with-straus-profiles '(0 1 3) '(0 1 4)) #'< :key
+  #'car))))
+* pdf walk through of steps for given sets
+0. "imset-decision-maker" is the name of the program; it is being
+invoked on the paired list of (013) and (0134) (CL-USER is the user
+prompt, my interface with the engine that is the computer language,
+Common Lisp, or CL)
+CL-USER> (imset-decision-maker '((0 1 3) (0 1 3 4)))
+1. here's X with its 12 transposed versions of Y
+((0 1 3) (0 1 3 4))
+((0 1 3) (1 2 4 5))
+((0 1 3) (2 3 5 6))
+((0 1 3) (3 4 6 7))
+((0 1 3) (4 5 7 8))
+((0 1 3) (5 6 8 9))
+((0 1 3) (6 7 9 10))
+((0 1 3) (7 8 10 11))
+((0 1 3) (8 9 11 0))
+((0 1 3) (9 10 0 1))
+((0 1 3) (10 11 1 2))
+((0 1 3) (11 0 2 3))
+2. find the Lewin-IFUNC of these 12, and append to them the reverse of
+those 12, which should cover X-Y when either are inverted
+(3 2 1 2 1 0 0 0 0 1 1 1)
+(1 3 2 1 2 1 0 0 0 0 1 1)
+(1 1 3 2 1 2 1 0 0 0 0 1)
+(1 1 1 3 2 1 2 1 0 0 0 0)
+(0 1 1 1 3 2 1 2 1 0 0 0)
+(0 0 1 1 1 3 2 1 2 1 0 0)
+(0 0 0 1 1 1 3 2 1 2 1 0)
+(0 0 0 0 1 1 1 3 2 1 2 1)
+(1 0 0 0 0 1 1 1 3 2 1 2)
+(2 1 0 0 0 0 1 1 1 3 2 1)
+(1 2 1 0 0 0 0 1 1 1 3 2)
+(2 1 2 1 0 0 0 0 1 1 1 3)
+hence, these twelve are the IFUNCS for (023)*(0134)
+(1 1 1 0 0 0 0 1 2 1 2 3)
+(1 1 0 0 0 0 1 2 1 2 3 1)
+(1 0 0 0 0 1 2 1 2 3 1 1)
+(0 0 0 0 1 2 1 2 3 1 1 1)
+(0 0 0 1 2 1 2 3 1 1 1 0)
+(0 0 1 2 1 2 3 1 1 1 0 0)
+(0 1 2 1 2 3 1 1 1 0 0 0)
+(1 2 1 2 3 1 1 1 0 0 0 0)
+(2 1 2 3 1 1 1 0 0 0 0 1)
+(1 2 3 1 1 1 0 0 0 0 1 2)
+(2 3 1 1 1 0 0 0 0 1 2 1)
+(3 1 1 1 0 0 0 0 1 2 1 2)
+which you can confirm here; note that the contents of the blue text
+below are the same as the second group of 12 just above, though they
+are listed in a different order, which is curious, but readily
+confirmable
+2.1 the program used here, "create-12-lewin-vectors,"
+produces--unsurprisingly--the 12 lewin-vectors by transposing Y 12
+times, shown here to increase transparency and confidence
+CL-USER> (create-12-lewin-vectors '(0 2 3) '(0 1 3 4))
+((2 3 1 1 1 0 0 0 0 1 2 1) (1 2 3 1 1 1 0 0 0 0 1 2) (2 1 2 3 1 1 1 0 0
+0 0 1) (1 2 1 2 3 1 1 1 0 0 0 0) (0 1 2 1 2 3 1 1 1 0 0 0) (0 0 1 2 1 2
+3 1 1 1 0 0) (0 0 0 1 2 1 2 3 1 1 1 0) (0 0 0 0 1 2 1 2 3 1 1 1) (1 0 0
+0 0 1 2 1 2 3 1 1) (1 1 0 0 0 0 1 2 1 2 3 1) (1 1 1 0 0 0 0 1 2 1 2 3)
+(3 1 1 1 0 0 0 0 1 2 1 2))
+3. using the Lewin-style IFUNCs, create the Straus-style imsets,
+proceeding in order down the big list of 24 IFUNCS produced in step 2,
+i.e.
+(0 0 0 1 1 2 3 3 4 9 10 11) = (3 2 1 2 1 0 0 0 0 1 1 1)
+(0 1 1 1 2 2 3 4 4 5 10 11) = (1 3 2 1 2 1 0 0 0 0 1 1) etc.
+(0 1 2 2 2 3 3 4 5 5 6 11)
+(0 1 2 3 3 3 4 4 5 6 6 7)
+(1 2 3 4 4 4 5 5 6 7 7 8)
+(2 3 4 5 5 5 6 6 7 8 8 9)
+(3 4 5 6 6 6 7 7 8 9 9 10)
+(4 5 6 7 7 7 8 8 9 10 10 11)
+(0 5 6 7 8 8 8 9 9 10 11 11)
+(0 0 1 6 7 8 9 9 9 10 10 11)
+(0 1 1 2 7 8 9 10 10 10 11 11)
+(0 0 1 2 2 3 8 9 10 11 11 11)
+(0 1 2 7 8 8 9 10 10 11 11 11)
+(0 1 6 7 7 8 9 9 10 10 10 11)
+(0 5 6 6 7 8 8 9 9 9 10 11)
+(4 5 5 6 7 7 8 8 8 9 10 11)
+(3 4 4 5 6 6 7 7 7 8 9 10)
+(2 3 3 4 5 5 6 6 6 7 8 9)
+(1 2 2 3 4 4 5 5 5 6 7 8)
+(0 1 1 2 3 3 4 4 4 5 6 7)
+(0 0 1 2 2 3 3 3 4 5 6 11)
+(0 1 1 2 2 2 3 4 5 10 11 11)
+(0 0 1 1 1 2 3 4 9 10 10 11)
+(0 0 0 1 2 3 8 9 9 10 11 11)
+4. determine the forte-prime form that results from following the
+Robinson approach to the above list of multisets; printed vertically
+here incidentally
+0
+1
+2
+3
+4
+5
+6
+7
+below is the list of reduced multisets that comes from processing the
+above; note there are TWO appearances of 01234567 in this case, though
+they came from different multisets above. this relates to the
+type/token distinction Robinson discusses. The ambiguity of
+"reintroduce the doublings" seems problematic here.
+(0 1 2 3 4 9 10 11)
+(0 1 2 3 4 5 10 11)
+(0 1 2 3 4 5 6 11)
+*(0 1 2 3 4 5 6 7)*
+(1 2 3 4 5 6 7 8)
+(2 3 4 5 6 7 8 9)
+(3 4 5 6 7 8 9 10)
+(4 5 6 7 8 9 10 11)
+(0 5 6 7 8 9 10 11)
+(0 1 6 7 8 9 10 11)
+(0 1 2 7 8 9 10 11)
+(0 1 2 3 8 9 10 11)
+(0 1 2 7 8 9 10 11)
+(0 1 6 7 8 9 10 11)
+(0 5 6 7 8 9 10 11)
+(4 5 6 7 8 9 10 11)
+(3 4 5 6 7 8 9 10)
+(2 3 4 5 6 7 8 9)
+(1 2 3 4 5 6 7 8)
+*(0 1 2 3 4 5 6 7)*
+(0 1 2 3 4 5 6 11)
+(0 1 2 3 4 5 10 11)
+(0 1 2 3 4 9 10 11)
+(0 1 2 3 8 9 10 11)
+5. report back on the appearances of chosen forte-prime form in the
+above list; 4 and 20 are the locations (0 1 2 3 4 5 6 7) appear in the
+list
+(0 1 2 3 4 5 6 7)
+4
+20
+6. find the generating, multiset parents of the prime form in question
+(that is, (0 1 2 3 4 5 6 7) in this case), by looking back at the big
+list created in step 3
+(0 1 2 3 3 3 4 4 5 6 6 7)
+(0 1 1 2 3 3 4 4 4 5 6 7)
+6.1 note, these two things appear again because in this case there were
+only two unique multiset parents; this is not always the case, as in
+the next example
+(0 1 2 3 3 3 4 4 5 6 6 7)
+(0 1 1 2 3 3 4 4 4 5 6 7)
+7. choose the best multiset from above, a process that can be a little
+tricky; see next example
+(0 1 1 2 3 3 4 4 4 5 6 7)
+---------------------------------------------------------------------
+Here's the version of the same process from above, but now with two
+symmetrical sets, (036) and (0134)
+0.
+CL-USER> (imset-decision-maker '((0 3 6) (0 1 3 4)))
+1.
+((0 3 6) (0 1 3 4))
+((0 3 6) (1 2 4 5))
+((0 3 6) (2 3 5 6))
+((0 3 6) (3 4 6 7))
+((0 3 6) (4 5 7 8))
+((0 3 6) (5 6 8 9))
+((0 3 6) (6 7 9 10))
+((0 3 6) (7 8 10 11))
+((0 3 6) (8 9 11 0))
+((0 3 6) (9 10 0 1))
+((0 3 6) (10 11 1 2))
+((0 3 6) (11 0 2 3))
+2. note that because both sets are symmetrical the step carried out
+here of appending the reverse of each IFUNC produces redundancies;
+however they are left in because it is procedurally simpler than
+trying to get the program to distinguish between the two cases.
+also note that the repetitive structure that characterizes the imset
+is most evident in certain rotations of the basic IFUNC
+(2 2 0 1 1 0 1 1 0 2 2 0)
+(0 2 2 0 1 1 0 1 1 0 2 2)
+(2 0 2 2 0 1 1 0 1 1 0 2)
+e.g. *(2 2 0 2 2 0 1 1 0 1 1 0)*
+(0 2 2 0 2 2 0 1 1 0 1 1)
+(1 0 2 2 0 2 2 0 1 1 0 1)
+(1 1 0 2 2 0 2 2 0 1 1 0)
+(0 1 1 0 2 2 0 2 2 0 1 1)
+(1 0 1 1 0 2 2 0 2 2 0 1)
+(1 1 0 1 1 0 2 2 0 2 2 0)
+(0 1 1 0 1 1 0 2 2 0 2 2)
+(2 0 1 1 0 1 1 0 2 2 0 2)
+(0 2 2 0 1 1 0 1 1 0 2 2)
+(2 2 0 1 1 0 1 1 0 2 2 0)
+(2 0 1 1 0 1 1 0 2 2 0 2)
+(0 1 1 0 1 1 0 2 2 0 2 2)
+(1 1 0 1 1 0 2 2 0 2 2 0)
+(1 0 1 1 0 2 2 0 2 2 0 1)
+(0 1 1 0 2 2 0 2 2 0 1 1)
+(1 1 0 2 2 0 2 2 0 1 1 0)
+(1 0 2 2 0 2 2 0 1 1 0 1)
+(0 2 2 0 2 2 0 1 1 0 1 1)
+(2 2 0 2 2 0 1 1 0 1 1 0)
+(2 0 2 2 0 1 1 0 1 1 0 2)
+3.
+(0 0 1 1 3 4 6 7 9 9 10 10)
+(1 1 2 2 4 5 7 8 10 10 11 11)
+(0 0 2 2 3 3 5 6 8 9 11 11)
+(0 0 1 1 3 3 4 4 6 7 9 10)
+(1 1 2 2 4 4 5 5 7 8 10 11)
+(0 2 2 3 3 5 5 6 6 8 9 11)
+(0 1 3 3 4 4 6 6 7 7 9 10)
+(1 2 4 4 5 5 7 7 8 8 10 11)
+(0 2 3 5 5 6 6 8 8 9 9 11)
+(0 1 3 4 6 6 7 7 9 9 10 10)
+(1 2 4 5 7 7 8 8 10 10 11 11)
+(0 0 2 3 5 6 8 8 9 9 11 11)
+(1 1 2 2 4 5 7 8 10 10 11 11)
+(0 0 1 1 3 4 6 7 9 9 10 10)
+(0 0 2 3 5 6 8 8 9 9 11 11)
+(1 2 4 5 7 7 8 8 10 10 11 11)
+(0 1 3 4 6 6 7 7 9 9 10 10)
+(0 2 3 5 5 6 6 8 8 9 9 11)
+(1 2 4 4 5 5 7 7 8 8 10 11)
+(0 1 3 3 4 4 6 6 7 7 9 10)
+(0 2 2 3 3 5 5 6 6 8 9 11)
+(1 1 2 2 4 4 5 5 7 8 10 11)
+(0 0 1 1 3 3 4 4 6 7 9 10)
+(0 0 2 2 3 3 5 6 8 9 11 11)
+4.
+0
+1
+3
+4
+6
+7
+9
+10
+now there are four!
+*(0 1 3 4 6 7 9 10)*
+(1 2 4 5 7 8 10 11)
+(0 2 3 5 6 8 9 11)
+*(0 1 3 4 6 7 9 10)*
+(1 2 4 5 7 8 10 11)
+(0 2 3 5 6 8 9 11)
+*(0 1 3 4 6 7 9 10)*
+(1 2 4 5 7 8 10 11)
+(0 2 3 5 6 8 9 11)
+*(0 1 3 4 6 7 9 10)*
+(1 2 4 5 7 8 10 11)
+(0 2 3 5 6 8 9 11)
+(1 2 4 5 7 8 10 11)
+(0 1 3 4 6 7 9 10)
+(0 2 3 5 6 8 9 11)
+(1 2 4 5 7 8 10 11)
+(0 1 3 4 6 7 9 10)
+(0 2 3 5 6 8 9 11)
+(1 2 4 5 7 8 10 11)
+(0 1 3 4 6 7 9 10)
+(0 2 3 5 6 8 9 11)
+(1 2 4 5 7 8 10 11)
+(0 1 3 4 6 7 9 10)
+(0 2 3 5 6 8 9 11)
+5. note this prime form appears four times now at levels of
+transposition that clearly relate to the imset itself. (if I used
+zero-indexing, i.e. counting up from 0 rather than 1, the occurrences
+below would show that the prime form appears above at T0, T3, T6 and T9)
+(also note that the last four appearances--14, 17, 20, and 23--are, of
+course, repetitions,
+but are left in because they do no harm)
+(0 1 3 4 6 7 9 10)
+1
+4
+7
+10
+14
+17
+20
+23
+6. there is redundancy here, but it is a necessary byproduct of the
+chosen procedure and is boiled down right below. note that this did
+NOT happen when in the first example
+(0 0 1 1 3 4 6 7 9 9 10 10)
+(0 0 1 1 3 3 4 4 6 7 9 10)
+(0 1 3 3 4 4 6 6 7 7 9 10)
+(0 1 3 4 6 6 7 7 9 9 10 10)
+(0 0 1 1 3 4 6 7 9 9 10 10)
+(0 1 3 4 6 6 7 7 9 9 10 10)
+(0 1 3 3 4 4 6 6 7 7 9 10)
+(0 0 1 1 3 3 4 4 6 7 9 10)
+6.1 four unique multisets which instantiate the forte-prime-form of (0 1
+3 4 6 7 9 10)
+(0 0 1 1 3 4 6 7 9 9 10 10)
+(0 1 3 4 6 6 7 7 9 9 10 10)
+(0 1 3 3 4 4 6 6 7 7 9 10)
+(0 0 1 1 3 3 4 4 6 7 9 10)
+7.
+(0 0 1 1 3 3 4 4 6 7 9 10)
+

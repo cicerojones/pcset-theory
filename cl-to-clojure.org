@@ -1471,7 +1471,9 @@ Wants a nested list
  #+END_SRC
 *** cl--finds the occurrence of a value at a certain place in a list
 why does this return the value that was searched for as well as the
-location? Some peculiarity of where it is called?
+location? Some peculiarity of where it is called? Perhaps because
+later on it is nice to see, for one, what the thing that is being
+located at those locations in fact is.
 
 #+BEGIN_SRC lisp :session cl-to-cloj
 (locate 10 '(0 100 10 1000 10 100000))
@@ -1479,11 +1481,19 @@ location? Some peculiarity of where it is called?
 
 #+RESULTS:
 | 10 | 3 | 5 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(locate '(0 1 3 4 6 7 9 10) '((0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11)))
+#+END_SRC
+
+#+RESULTS:
+| (0 1 3 4 6 7 9 10) | 1 | 4 | 7 | 10 | 14 | 17 | 20 | 23 |
+
 *** clj--can't quite use keep-indexed as locate 			:clj:
 taken from SO discussions about indices and finding
 http://stackoverflow.com/questions/4830900/how-do-i-find-the-index-of-an-item-in-a-vector
 http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-predicate-in-clojure
-
+**** positions function to be wrapped
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn positions
   [pred coll]
@@ -1502,6 +1512,35 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 
 #+RESULTS:
 | 2 | 4 |
+**** 
+#+BEGIN_SRC clojure :session cl-to-cloj
+(map inc (positions #(= % 10) '(0 100 10 1000 10 100000)))
+#+END_SRC
+
+#+RESULTS:
+| 3 | 5 |
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [element 10]
+(concat (list element) (map inc (positions #(= % element) '(0 100 10 1000 10 100000)))))
+#+END_SRC
+
+#+RESULTS:
+| 10 | 3 | 5 |
+**** code
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn locate [x lat]
+  (concat (list x) (map inc (positions #(= % x) lat))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/locate
+#+BEGIN_SRC clojure :session cl-to-cloj
+(locate '(0 1 3 4 6 7 9 10) '((0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11)))
+#+END_SRC
+
+#+RESULTS:
+| (0 1 3 4 6 7 9 10) | 1 | 4 | 7 | 10 | 14 | 17 | 20 | 23 |
 
 ** all these substeps of imset-decision-maker are here why?
 #+BEGIN_SRC lisp :session cl-to-cloj
@@ -2456,7 +2495,8 @@ f)
 | 0 | 1 | 2 | 3 |
 
 * full documentation separated out for imset-decision-maker
-** cl definition
+** canonical cl definition and examples
+*** code
 #+BEGIN_SRC lisp :session cl-to-cloj
 (defun imset-decision-maker (paired-list)
   (let* (
@@ -2483,13 +2523,28 @@ f)
 
 #+RESULTS:
 : IMSET-DECISION-MAKER
-
+*** called examples
 #+BEGIN_SRC lisp :session cl-to-cloj
 (imset-decision-maker '((0 1) (0 1 3)))
 #+END_SRC
 
 #+RESULTS:
 | 0 | 1 | 1 | 2 | 3 | 4 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(imset-decision-maker '((0 2 4) (0 2 6)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 | 2 | 2 | 4 | 4 | 6 | 8 | 10 |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(imset-decision-maker '((0 3 6) (0 1 3 4)))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 | 1 | 1 | 3 | 3 | 4 | 4 | 6 | 7 | 9 | 10 |
+
 ** clj naive definition
 *** code
 #+BEGIN_SRC clojure :session cl-to-cloj
@@ -2532,7 +2587,6 @@ f)
 | 0 | 1 | 2 | 3 |
 
 *** g--call distinct
-
 **** (0 1) (0 1 2)
 
 #+BEGIN_SRC clojure :session cl-to-cloj
@@ -2564,6 +2618,429 @@ g)
 
 #+RESULTS:
 | 0 | 2 | 4 | 6 | 8 | 10 |
+
+*** h--locate function
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 2 4) '(0 2 6))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (distinct f)
+      h (locate f g]
+g)
+#+END_SRC
+
+* calling imset in various stages
+** massive full unexpurgated function composition--up to comparing length of results
+
+*** use '(0 1) '(0 2) to break down each step of a sequence
+ the whole ~j~ step diversion must be due to special situations that
+ need to be documented. The proverbial corner cases...
+
+*** length test after j
+
+ length is less than or equal to 2, means what? In all likelihood that
+ you have your candidates right here. A great majority of these
+ set-pairs will come down to only one of two
+  #+BEGIN_SRC lisp :session cl-to-cloj
+
+;;; used to check the 'j' step
+(length
+ (remove-duplicates
+  (loop for idx in
+       (cdr (locate
+	     (multiset-forte-primeA
+	      (car (mapcar #'clean-profile
+			   (append
+			    (mapcar #'createA-lewin-vector
+				    (make-pairs-from-list 
+				     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+								     '(0 2))))
+			    (mapcar #'reverse
+				    (mapcar #'createA-lewin-vector
+					    (make-pairs-from-list 
+					     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+									     '(0 2)))))))))
+	     (mapcar #'remove-duplicates
+		     (mapcar #'clean-profile
+			     (append  (mapcar #'createA-lewin-vector
+					      (make-pairs-from-list 
+					       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+									       '(0 2))))
+				      (mapcar #'reverse
+					      (mapcar #'createA-lewin-vector
+						      (make-pairs-from-list 
+						       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										       '(0 2))))))))))
+     collect (nth (1- idx)
+		  (mapcar #'clean-profile
+			  (append  (mapcar #'createA-lewin-vector
+					   (make-pairs-from-list 
+					    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+									    '(0 2))))
+				   (mapcar #'reverse
+					   (mapcar #'createA-lewin-vector
+						   (make-pairs-from-list 
+						    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										    '(0 2)))))))) ) :test #'equal))
+
+
+;; 1
+
+ #+END_SRC
+
+*** j
+ Returns a single list, whose nesting suggest that more than one
+ resulting list is possible
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(remove-duplicates (loop for idx in (cdr (locate (multiset-forte-primeA (car (mapcar #'clean-profile
+										     (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+															      (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																			      '(0 2))))
+											      (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+																		(set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																						'(0 2)))))))))
+						 (mapcar #'remove-duplicates
+							 (mapcar #'clean-profile
+								 (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+													  (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																	  '(0 2))))
+									  (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+															    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																			    '(0 2))))))))))
+		      collect (nth (1- idx) (mapcar #'clean-profile
+						    (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+											     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+															     '(0 2))))
+							     (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+													       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+																	       '(0 2)))))))) ) :test #'equal)
+
+;; ((0 1 2 3))
+
+ #+END_SRC
+
+*** i
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(loop for idx in (cdr (locate (multiset-forte-primeA (car (mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))))
+	(mapcar #'remove-duplicates
+	(mapcar #'clean-profile
+		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+											 '(0 2))))
+			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													   '(0 2))))))))))
+   collect (nth (1- idx) (mapcar #'clean-profile
+				 (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									  (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													  '(0 2))))
+					  (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+											    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+															    '(0 2)))))))) )
+
+;; ((0 1 2 3) (0 1 2 3))
+
+ #+END_SRC
+
+*** h
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(locate (multiset-forte-primeA (car (mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))))
+	(mapcar #'remove-duplicates
+	(mapcar #'clean-profile
+		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+											 '(0 2))))
+			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													   '(0 2)))))))))
+
+;; ((0 1 2 3) 2 22)
+
+ #+END_SRC
+
+*** g
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'remove-duplicates
+	(mapcar #'clean-profile
+		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+											 '(0 2))))
+			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+													   '(0 2))))))))
+
+;; ((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11))
+
+ #+END_SRC
+
+*** f
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+
+(multiset-forte-primeA (car (mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))))
+
+;; (0 1 2 3)
+
+ #+END_SRC
+
+*** e
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'clean-profile
+	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+										 '(0 2))))
+		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+												   '(0 2)))))))
+
+;; ((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11))
+
+ #+END_SRC
+
+*** d
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2))))
+	 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2))))))
+;;((1 1 1 0 0 0 0 0 0 0 0 1) (1 1 1 1 0 0 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 0 0 1 1 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (1 1 0 0 0 0 0 0 0 0 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (0 0 0 0 0 0 0 0 1 1 1 1) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (1 1 1 1 0 0 0 0 0 0 0 0) (1 1 1 0 0 0 0 0 0 0 0 1) (1 1 0 0 0 0 0 0 0 0 1 1))
+
+ #+END_SRC
+
+*** c
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2)))))
+
+;;((1 0 0 0 0 0 0 0 0 1 1 1) (0 0 0 0 0 0 0 0 1 1 1 1) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (1 1 1 1 0 0 0 0 0 0 0 0) (1 1 1 0 0 0 0 0 0 0 0 1) (1 1 0 0 0 0 0 0 0 0 1 1))
+
+ #+END_SRC
+
+*** b
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(mapcar #'createA-lewin-vector (make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2))))
+
+;;((1 1 1 0 0 0 0 0 0 0 0 1) (1 1 1 1 0 0 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 0 0 1 1 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (1 1 0 0 0 0 0 0 0 0 1 1))
+
+ #+END_SRC
+
+*** a
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+(make-pairs-from-list 
+   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
+				   '(0 2)))
+
+;;(((0 1) (0 2)) ((0 1) (1 3)) ((0 1) (2 4)) ((0 1) (3 5)) ((0 1) (4 6)) ((0 1) (5 7)) ((0 1) (6 8)) ((0 1) (7 9)) ((0 1) (8 10)) ((0 1) (9 11)) ((0 1) (10 0)) ((0 1) (11 1)))
+
+ #+END_SRC
+
+*** a'
+
+ #+BEGIN_SRC lisp :session cl-to-cloj
+;;;; HUGE! Make all the pairings of two sets, X and transposed version of Y
+(set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))
+;; ((0 1) (0 2) (0 1) (1 3) (0 1) (2 4) (0 1) (3 5) (0 1) (4 6) (0 1) (5 7) (0 1) (6 8) (0 1) (7 9) (0 1) (8 10) (0 1) (9 11) (0 1) (10 0) (0 1) (11 1))
+
+
+
+  #+END_SRC
+
+** selected runs of part of the multiset sequence
+
+** e
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let ((paired-list '((0 3 6) (0 1 3 4))))
+	   (let* (
+		  (a (make-pairs-from-list 
+		      (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
+						      (cadr paired-list))))
+		  (b (mapcar #'createA-lewin-vector a))
+		  (c (mapcar #'reverse b))
+		  (d (append b c))
+		  (e (mapcar #'clean-profile d)))
+e))
+	
+	
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 | 1 | 1 | 3 | 4 | 6 | 7 |  9 |  9 | 10 | 10 |
+| 1 | 1 | 2 | 2 | 4 | 5 | 7 | 8 | 10 | 10 | 11 | 11 |
+| 0 | 0 | 2 | 2 | 3 | 3 | 5 | 6 |  8 |  9 | 11 | 11 |
+| 0 | 0 | 1 | 1 | 3 | 3 | 4 | 4 |  6 |  7 |  9 | 10 |
+| 1 | 1 | 2 | 2 | 4 | 4 | 5 | 5 |  7 |  8 | 10 | 11 |
+| 0 | 2 | 2 | 3 | 3 | 5 | 5 | 6 |  6 |  8 |  9 | 11 |
+| 0 | 1 | 3 | 3 | 4 | 4 | 6 | 6 |  7 |  7 |  9 | 10 |
+| 1 | 2 | 4 | 4 | 5 | 5 | 7 | 7 |  8 |  8 | 10 | 11 |
+| 0 | 2 | 3 | 5 | 5 | 6 | 6 | 8 |  8 |  9 |  9 | 11 |
+| 0 | 1 | 3 | 4 | 6 | 6 | 7 | 7 |  9 |  9 | 10 | 10 |
+| 1 | 2 | 4 | 5 | 7 | 7 | 8 | 8 | 10 | 10 | 11 | 11 |
+| 0 | 0 | 2 | 3 | 5 | 6 | 8 | 8 |  9 |  9 | 11 | 11 |
+| 1 | 1 | 2 | 2 | 4 | 5 | 7 | 8 | 10 | 10 | 11 | 11 |
+| 0 | 0 | 1 | 1 | 3 | 4 | 6 | 7 |  9 |  9 | 10 | 10 |
+| 0 | 0 | 2 | 3 | 5 | 6 | 8 | 8 |  9 |  9 | 11 | 11 |
+| 1 | 2 | 4 | 5 | 7 | 7 | 8 | 8 | 10 | 10 | 11 | 11 |
+| 0 | 1 | 3 | 4 | 6 | 6 | 7 | 7 |  9 |  9 | 10 | 10 |
+| 0 | 2 | 3 | 5 | 5 | 6 | 6 | 8 |  8 |  9 |  9 | 11 |
+| 1 | 2 | 4 | 4 | 5 | 5 | 7 | 7 |  8 |  8 | 10 | 11 |
+| 0 | 1 | 3 | 3 | 4 | 4 | 6 | 6 |  7 |  7 |  9 | 10 |
+| 0 | 2 | 2 | 3 | 3 | 5 | 5 | 6 |  6 |  8 |  9 | 11 |
+| 1 | 1 | 2 | 2 | 4 | 4 | 5 | 5 |  7 |  8 | 10 | 11 |
+| 0 | 0 | 1 | 1 | 3 | 3 | 4 | 4 |  6 |  7 |  9 | 10 |
+| 0 | 0 | 2 | 2 | 3 | 3 | 5 | 6 |  8 |  9 | 11 | 11 |
+
+** f
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let ((paired-list '((0 3 6) (0 1 3 4))))
+	   (let* (
+		  (a (make-pairs-from-list 
+		      (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
+						      (cadr paired-list))))
+		  (b (mapcar #'createA-lewin-vector a))
+		  (c (mapcar #'reverse b))
+		  (d (append b c))
+		  (e (mapcar #'clean-profile d))
+		  (f (multiset-forte-primeA (car e))))
+		  f))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 3 | 4 | 6 | 7 | 9 | 10 |
+
+** run up to g--removing duplicates from e means going from a "multiset" to a "regular set"
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let ((paired-list '((0 3 6) (0 1 3 4))))
+	   (let* (
+		  (a (make-pairs-from-list 
+		      (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
+						      (cadr paired-list))))
+		  (b (mapcar #'createA-lewin-vector a))
+		  (c (mapcar #'reverse b))
+		  (d (append b c))
+		  (e (mapcar #'clean-profile d)) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
+		  (f (multiset-forte-primeA (car e))) ; car because only need check the first one as they
+					; all will represent the same forteprime (why, again?)
+		  (g (mapcar #'remove-duplicates e)))
+		  (list "e: " e "g: "g)))
+#+END_SRC
+
+#+RESULTS:
+| e: | ((0 0 1 1 3 4 6 7 9 9 10 10) (1 1 2 2 4 5 7 8 10 10 11 11) (0 0 2 2 3 3 5 6 8 9 11 11) (0 0 1 1 3 3 4 4 6 7 9 10) (1 1 2 2 4 4 5 5 7 8 10 11) (0 2 2 3 3 5 5 6 6 8 9 11) (0 1 3 3 4 4 6 6 7 7 9 10) (1 2 4 4 5 5 7 7 8 8 10 11) (0 2 3 5 5 6 6 8 8 9 9 11) (0 1 3 4 6 6 7 7 9 9 10 10) (1 2 4 5 7 7 8 8 10 10 11 11) (0 0 2 3 5 6 8 8 9 9 11 11) (1 1 2 2 4 5 7 8 10 10 11 11) (0 0 1 1 3 4 6 7 9 9 10 10) (0 0 2 3 5 6 8 8 9 9 11 11) (1 2 4 5 7 7 8 8 10 10 11 11) (0 1 3 4 6 6 7 7 9 9 10 10) (0 2 3 5 5 6 6 8 8 9 9 11) (1 2 4 4 5 5 7 7 8 8 10 11) (0 1 3 3 4 4 6 6 7 7 9 10) (0 2 2 3 3 5 5 6 6 8 9 11) (1 1 2 2 4 4 5 5 7 8 10 11) (0 0 1 1 3 3 4 4 6 7 9 10) (0 0 2 2 3 3 5 6 8 9 11 11)) | g: | ((0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11)) |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let ((paired-list '((0 3 6) (0 1 3 4))))
+	   (let* (
+		  (a (make-pairs-from-list 
+		      (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
+						      (cadr paired-list))))
+		  (b (mapcar #'createA-lewin-vector a))
+		  (c (mapcar #'reverse b))
+		  (d (append b c))
+		  (e (mapcar #'clean-profile d)) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
+		  (f (multiset-forte-primeA (car e))) ; car because only need check the first one as they
+					; all will represent the same forteprime (why, again?)
+		  (g (mapcar #'remove-duplicates e)))
+		  (list "f: " f "g: " g)))
+#+END_SRC
+
+#+RESULTS:
+| f: | (0 1 3 4 6 7 9 10) | g: | ((0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11)) |
+
+#+BEGIN_SRC lisp :session cl-to-cloj
+(LOCATE '(0 1 3 4 6 7 9 10) '((0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (0 1 3 4 6 7 9 10) (1 2 4 5 7 8 10 11) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11) (1 2 4 5 7 8 10 11) (0 1 3 4 6 7 9 10) (0 2 3 5 6 8 9 11)))
+#+END_SRC
+
+#+RESULTS:
+| (0 1 3 4 6 7 9 10) | 1 | 4 | 7 | 10 | 14 | 17 | 20 | 23 |
+
+** run up to j
+*** 036-0134
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let ((paired-list '((0 3 6) (0 1 3 4))))
+	   (let* (
+		  (a (make-pairs-from-list 
+		      (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
+						      (cadr paired-list))))
+		  (b (mapcar #'createA-lewin-vector a))
+		  (c (mapcar #'reverse b))
+		  (d (append b c))
+		  (e (mapcar #'clean-profile d)) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
+		  (f (multiset-forte-primeA (car e))) ; car because only need check the first one as they
+					; all will represent the same forteprime (why, again?)
+		  (g (mapcar #'remove-duplicates e))
+		  (h (locate f g))
+		  (i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output
+			collect (nth (1- idx) e))) ;locate is not zero-indexed apparently
+		  (j (remove-duplicates i :test #'equal)))
+	     j))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 | 1 | 1 | 3 | 4 | 6 | 7 | 9 | 9 | 10 | 10 |
+| 0 | 1 | 3 | 4 | 6 | 6 | 7 | 7 | 9 | 9 | 10 | 10 |
+| 0 | 1 | 3 | 3 | 4 | 4 | 6 | 6 | 7 | 7 |  9 | 10 |
+| 0 | 0 | 1 | 1 | 3 | 3 | 4 | 4 | 6 | 7 |  9 | 10 |
+
+*** 037-0134
+#+BEGIN_SRC lisp :session cl-to-cloj
+(let ((paired-list '((0 3 7) (0 1 3 4))))
+	   (let* (
+		  (a (make-pairs-from-list 
+		      (set-up-Tn-equivalent-Ys-with-X (car paired-list) 
+						      (cadr paired-list))))
+		  (b (mapcar #'createA-lewin-vector a))
+		  (c (mapcar #'reverse b))
+		  (d (append b c))
+		  (e (mapcar #'clean-profile d)) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
+		  (f (multiset-forte-primeA (car e))) ; car because only need check the first one as they
+					; all will represent the same forteprime (why, again?)
+		  (g (mapcar #'remove-duplicates e))
+		  (h (locate f g))
+		  (i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output
+			collect (nth (1- idx) e))) ;locate is not zero-indexed apparently
+		  (j (remove-duplicates i :test #'equal)))
+	     j))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | 2 | 3 | 5 | 6 | 6 | 7 | 9 | 9 | 10 | 10 |
 
 * miscellaneous documentation
 ** streamlined documentation
@@ -2716,185 +3193,6 @@ g)
 			     (hmm (cdr rec-loli)))))))
      (hmm loli))))
  #+END_SRC
-
-** massive full unexpurgated function composition--up to comparing length of results
-the whole ~j~ step diversion must be due to special situations that
-need to be documented. The proverbial corner cases...
-#+BEGIN_SRC lisp :session cl-to-cloj
-
-;;; used to check the 'j' step
-(length
- (remove-duplicates
-  (loop for idx in
-       (cdr (locate
-	     (multiset-forte-primeA
-	      (car (mapcar #'clean-profile
-			   (append
-			    (mapcar #'createA-lewin-vector
-				    (make-pairs-from-list 
-				     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-								     '(0 2))))
-			    (mapcar #'reverse
-				    (mapcar #'createA-lewin-vector
-					    (make-pairs-from-list 
-					     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-									     '(0 2)))))))))
-	     (mapcar #'remove-duplicates
-		     (mapcar #'clean-profile
-			     (append  (mapcar #'createA-lewin-vector
-					      (make-pairs-from-list 
-					       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-									       '(0 2))))
-				      (mapcar #'reverse
-					      (mapcar #'createA-lewin-vector
-						      (make-pairs-from-list 
-						       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-										       '(0 2))))))))))
-     collect (nth (1- idx)
-		  (mapcar #'clean-profile
-			  (append  (mapcar #'createA-lewin-vector
-					   (make-pairs-from-list 
-					    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-									    '(0 2))))
-				   (mapcar #'reverse
-					   (mapcar #'createA-lewin-vector
-						   (make-pairs-from-list 
-						    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-										    '(0 2)))))))) ) :test #'equal))
-
-;; 1
-
-(remove-duplicates (loop for idx in (cdr (locate (multiset-forte-primeA (car (mapcar #'clean-profile
-										     (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-															      (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-																			      '(0 2))))
-											      (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-																		(set-up-Tn-equivalent-Ys-with-X '(0 1) 
-																						'(0 2)))))))))
-						 (mapcar #'remove-duplicates
-							 (mapcar #'clean-profile
-								 (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-													  (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-																	  '(0 2))))
-									  (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-															    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-																			    '(0 2))))))))))
-		      collect (nth (1- idx) (mapcar #'clean-profile
-						    (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-											     (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-															     '(0 2))))
-							     (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-													       (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-																	       '(0 2)))))))) ) :test #'equal)
-
-;; ((0 1 2 3))
-
-(loop for idx in (cdr (locate (multiset-forte-primeA (car (mapcar #'clean-profile
-	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-										 '(0 2))))
-		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-												   '(0 2)))))))))
-	(mapcar #'remove-duplicates
-	(mapcar #'clean-profile
-		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-											 '(0 2))))
-			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-													   '(0 2))))))))))
-   collect (nth (1- idx) (mapcar #'clean-profile
-				 (append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-									  (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-													  '(0 2))))
-					  (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-											    (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-															    '(0 2)))))))) )
-
-;; ((0 1 2 3) (0 1 2 3))
-
-(locate (multiset-forte-primeA (car (mapcar #'clean-profile
-	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-										 '(0 2))))
-		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-												   '(0 2)))))))))
-	(mapcar #'remove-duplicates
-	(mapcar #'clean-profile
-		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-											 '(0 2))))
-			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-													   '(0 2)))))))))
-
-;; ((0 1 2 3) 2 22)
-
-(mapcar #'remove-duplicates
-	(mapcar #'clean-profile
-		(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-							 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-											 '(0 2))))
-			 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-									   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-													   '(0 2))))))))
-
-;; ((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11))
-
-(multiset-forte-primeA (car (mapcar #'clean-profile
-	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-										 '(0 2))))
-		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-												   '(0 2)))))))))
-
-;; (0 1 2 3)
-
-(mapcar #'clean-profile
-	(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-						 (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-										 '(0 2))))
-		 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-								   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-												   '(0 2)))))))
-;; ((0 1 2 11) (0 1 2 3) (1 2 3 4) (2 3 4 5) (3 4 5 6) (4 5 6 7) (5 6 7 8) (6 7 8 9) (7 8 9 10) (8 9 10 11) (0 9 10 11) (0 1 10 11) (0 9 10 11) (8 9 10 11) (7 8 9 10) (6 7 8 9) (5 6 7 8) (4 5 6 7) (3 4 5 6) (2 3 4 5) (1 2 3 4) (0 1 2 3) (0 1 2 11) (0 1 10 11))
-
-(append  (mapcar #'createA-lewin-vector (make-pairs-from-list 
-   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-				   '(0 2))))
-	 (mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-				   '(0 2))))))
-;;((1 1 1 0 0 0 0 0 0 0 0 1) (1 1 1 1 0 0 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 0 0 1 1 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (1 1 0 0 0 0 0 0 0 0 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (0 0 0 0 0 0 0 0 1 1 1 1) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (1 1 1 1 0 0 0 0 0 0 0 0) (1 1 1 0 0 0 0 0 0 0 0 1) (1 1 0 0 0 0 0 0 0 0 1 1))
-
-(mapcar #'reverse (mapcar #'createA-lewin-vector (make-pairs-from-list 
-   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-				   '(0 2)))))
-
-;;((1 0 0 0 0 0 0 0 0 1 1 1) (0 0 0 0 0 0 0 0 1 1 1 1) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (1 1 1 1 0 0 0 0 0 0 0 0) (1 1 1 0 0 0 0 0 0 0 0 1) (1 1 0 0 0 0 0 0 0 0 1 1))
-
-(mapcar #'createA-lewin-vector (make-pairs-from-list 
-   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-				   '(0 2))))
-
-;;((1 1 1 0 0 0 0 0 0 0 0 1) (1 1 1 1 0 0 0 0 0 0 0 0) (0 1 1 1 1 0 0 0 0 0 0 0) (0 0 1 1 1 1 0 0 0 0 0 0) (0 0 0 1 1 1 1 0 0 0 0 0) (0 0 0 0 1 1 1 1 0 0 0 0) (0 0 0 0 0 1 1 1 1 0 0 0) (0 0 0 0 0 0 1 1 1 1 0 0) (0 0 0 0 0 0 0 1 1 1 1 0) (0 0 0 0 0 0 0 0 1 1 1 1) (1 0 0 0 0 0 0 0 0 1 1 1) (1 1 0 0 0 0 0 0 0 0 1 1))
-
-(make-pairs-from-list 
-   (set-up-Tn-equivalent-Ys-with-X '(0 1) 
-				   '(0 2)))
-
-;;(((0 1) (0 2)) ((0 1) (1 3)) ((0 1) (2 4)) ((0 1) (3 5)) ((0 1) (4 6)) ((0 1) (5 7)) ((0 1) (6 8)) ((0 1) (7 9)) ((0 1) (8 10)) ((0 1) (9 11)) ((0 1) (10 0)) ((0 1) (11 1)))
-
-;;;; HUGE! Make all the pairings of two sets, X and transposed version of Y
-(set-up-Tn-equivalent-Ys-with-X '(0 1) '(0 2))
-;; ((0 1) (0 2) (0 1) (1 3) (0 1) (2 4) (0 1) (3 5) (0 1) (4 6) (0 1) (5 7) (0 1) (6 8) (0 1) (7 9) (0 1) (8 10) (0 1) (9 11) (0 1) (10 0) (0 1) (11 1))
-
-
-
-#+END_SRC
 * uncalled prime form functions
 ** [#B] wrap-vectors--never called
  #+BEGIN_SRC lisp :session cl-to-cloj
