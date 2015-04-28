@@ -20,7 +20,7 @@
 #+RESULTS:
 : #'post_tonal_overtone.core/list+
 
-#+BEGIN_SRC clojure :session cl-to-cloj
+#+BEGIN_SRC clojure :session cl-to-cloj :exports both
 (list+ 3 [1 2 3])
 #+END_SRC
 
@@ -386,6 +386,40 @@ http://clojuredocs.org/clojure.core/contains_q
  | 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
 ****** clojure
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn pc-compari [n1 n2]
+  (cond (<= n1 n2) (cond (= n1 n2) 0
+                         :else (inc (pc-compari n1 (dec n2))))
+        :else (cond (= (mod n1 12) n2) 0
+                    :else (inc (pc-compari (inc n1) n2)))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/pc-compari
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn rec-do-pc-compari [lst1 lst2]
+  (letfn [(rec [l1 l2]
+                   (cond (empty? l1) ()
+                         :else (cons (pc-compari (first l1) (first l2))
+                                     (rec (rest l1) l2))))]
+    (cond (empty? lst2) ()
+          :else (cons (rec lst1 lst2)
+                      (rec-do-pc-compari lst1 (rest lst2))))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/rec-do-pc-compari
+
+ #+BEGIN_SRC clojure :session cl-to-cloj
+(defn create-lewin-vector [set1 set2]
+  (counting (flatten (rec-do-pc-compari set1 set2))))
+ #+END_SRC
+
+ #+RESULTS:
+ : #'post_tonal_overtone.core/create-lewin-vector
+
+note rec-do-compari had not been defined yet--had to sneak it in here
  #+BEGIN_SRC clojure
 (counting (flatten (rec-do-pc-compari '(0 1) '(0 1 2))))
  #+END_SRC
@@ -493,11 +527,13 @@ http://clojuredocs.org/clojure.core/contains_q
 *** how can you do this in clojure?
 
 #+BEGIN_SRC clojure :session cl-to-cloj
- (create-lewin-vector ' (0 1) ' (0 1 2))
+;; defined later--don't call here
+;; (create-lewin-vector ' (0 1) ' (0 1 2))
 #+END_SRC
 
 #+RESULTS:
-| 2 | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+
 
 #+BEGIN_SRC clojure :session cl-to-cloj :results output
 (println  (let [v (create-lewin-vector '(0 1) '(0 1 2))]
@@ -514,6 +550,21 @@ http://clojuredocs.org/clojure.core/contains_q
 #+END_SRC
 #+RESULTS:
 | 0 | 0 | 1 | 1 | 2 | 11 |
+
+This appears to be needed earlier, as well.
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn rec-do-pc-compari [lst1 lst2]
+  (letfn [(rec [l1 l2]
+                   (cond (empty? l1) ()
+                         :else (cons (pc-compari (first l1) (first l2))
+                                     (rec (rest l1) l2))))]
+    (cond (empty? lst2) ()
+          :else (cons (rec lst1 lst2)
+                      (rec-do-pc-compari lst1 (rest lst2))))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/rec-do-pc-compari
 
 *** like this:
 
@@ -567,6 +618,23 @@ http://clojuredocs.org/clojure.core/contains_q
 
 **** process
 ***** basic example with pure lists--as expected from cl
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn de-nestc [x]
+  (letfn [(denester [inner-x acc]
+            (let [coll inner-x]
+              (cond (empty? coll) acc
+                    (not (counted? (first coll))) (cons coll acc)
+                    :else (denester (first coll) (denester (rest coll) acc)))))]
+    (denester x ())))
+
+
+
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/de-nestc
+
 #+BEGIN_SRC clojure
 (de-nestc '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7)))))
 #+END_SRC
@@ -580,7 +648,7 @@ http://clojuredocs.org/clojure.core/contains_q
 | 0 | 1 | 2 | 4 |
 | 0 | 1 | 3 | 5 |
 | 0 | 1 | 4 | 6 |
-| 0 | 2 | 5 | 7 | 
+| 0 | 2 | 5 | 7 |
 
 ***** basic example with lists of vectors--still as expected from cl
 #+BEGIN_SRC clojure
@@ -605,6 +673,14 @@ http://clojuredocs.org/clojure.core/contains_q
 | 24 | 61 | 52 |
 | 24 | 61 | 64 |
 ***** examining a data structure referred to by a var
+Let's make a little trip01
+#+BEGIN_SRC clojure
+(def trip014 (list '(([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64]))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/trip014
+
 #+BEGIN_SRC clojure :results output
 (println (first trip014))
 #+END_SRC
@@ -617,7 +693,7 @@ http://clojuredocs.org/clojure.core/contains_q
 #+END_SRC
 
 #+RESULTS:
-: ((([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64])))
+: ([24 25 28] [24 25 40] [24 25 52] [24 25 64] [24 37 28] [24 37 40] [24 37 52] [24 37 64] [24 49 28] [24 49 40] [24 49 52] [24 49 64] [24 61 28] [24 61 40] [24 61 52] [24 61 64])
 ***** ah. concat needs to be applied
 #+BEGIN_SRC clojure :results output
 (println (apply concat (first trip014)))
@@ -631,6 +707,25 @@ http://clojuredocs.org/clojure.core/contains_q
 #+BEGIN_SRC clojure
 (de-nestc '(([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64])))
 #+END_SRC
+
+#+RESULTS:
+| 24 | 25 | 28 |
+| 24 | 25 | 40 |
+| 24 | 25 | 52 |
+| 24 | 25 | 64 |
+| 24 | 37 | 28 |
+| 24 | 37 | 40 |
+| 24 | 37 | 52 |
+| 24 | 37 | 64 |
+| 24 | 49 | 28 |
+| 24 | 49 | 40 |
+| 24 | 49 | 52 |
+| 24 | 49 | 64 |
+| 24 | 61 | 28 |
+| 24 | 61 | 40 |
+| 24 | 61 | 52 |
+| 24 | 61 | 64 |
+
 *** clj--de-nestc code							:clj:
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn de-nestc [x]
@@ -644,6 +739,9 @@ http://clojuredocs.org/clojure.core/contains_q
 
 
 #+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/de-nestc
 
 #+BEGIN_SRC clojure :results output
 (println (apply concat (first trip014)))
@@ -703,7 +801,7 @@ backwards version because of cons-ing
 #+END_SRC
 
 #+RESULTS:
-: #'post_tonal_overtone.core/set-up((0 1 2) (0 1 2 4 6) (0 1 2) (0 4) (0 1 2) (0 1 2))
+: #'post_tonal_overtone.core/set-up((0 1 2) (0 1 2) (0 4) (0 1 2) (0 1 2 4 6) (0 1 2))
 
 ** make pairs = partition
 
@@ -980,13 +1078,23 @@ Produces pairs of set1 and transposed versions of set2
 
 *** clj									:clj:
 **** clj prepare-set-up
+er, this is terrible confusion! only one punctuation!!
 #+BEGIN_SRC clojure :session cl-to-cloj
-(defn prepare-set-up-tn-equivalent-Ys-with-x [pcset1 pcset2]
- (set-up pcset1 (first (TnI-all (list pcset2)))))
+(defn set-up-Tn-equivalent-Ys-with-X [pcset1 pcset2]
+(map reverse (partition 2 (prepare-set-up-tn-equivalent-Ys-with-x pcset1 pcset2))))
 #+END_SRC
 
 #+RESULTS:
-: #'post_tonal_overtone.core/prepare-set-up-tn-equivalent-Ys-with-x
+: #'post_tonal_overtone.core/set-up-Tn-equivalent-Ys-with-X
+
+let's comment this out and see what happens elsewhere...
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+;; (defn prepare-set-up-tn-equivalent-Ys-with-x [pcset1 pcset2]
+;;  (set-up pcset1 (first (TnI-all (list pcset2)))))
+#+END_SRC
+
+#+RESULTS:
 
 **** clj-- produces wrong order!!!
 (set-up-Tn-equivalent-Ys-with-X set1 set2)
@@ -999,32 +1107,21 @@ Produces pairs of set1 and transposed versions of set2
 : #'post_tonal_overtone.core/set-up-Tn-equivalent-Ys-with-X
 
 **** requirees two steps
+
+errrr, case-sensitivity!!
 #+BEGIN_SRC clojure :session cl-to-cloj
-(map reverse (partition 2 (set-up-tn-equivalent-ys-with-x '(0 1) '(0 1 3))))
+;; (map reverse (partition 2 (set-up-tn-equivalent-ys-with-x '(0 1) '(0 1 3))))
 #+END_SRC
 
 #+RESULTS:
-| (0 1) | (0 1 3)   |
-| (0 1) | (1 2 4)   |
-| (0 1) | (2 3 5)   |
-| (0 1) | (3 4 6)   |
-| (0 1) | (4 5 7)   |
-| (0 1) | (5 6 8)   |
-| (0 1) | (6 7 9)   |
-| (0 1) | (7 8 10)  |
-| (0 1) | (8 9 11)  |
-| (0 1) | (9 10 0)  |
-| (0 1) | (10 11 1) |
-| (0 1) | (11 0 2)  |
-| (0 1) | (0 1 3)   |
 
 Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+BEGIN_SRC clojure :session cl-to-cloj :results output
-(println (set-up-tn-equivalent-ys-with-x  '(0 1 3) '(0 1)))
+(println (set-up-Tn-equivalent-Ys-with-X  '(0 1 3) '(0 1)))
 #+END_SRC
 
 #+RESULTS:
-: ((0 1) (0 1 3) (1 2) (0 1 3) (2 3) (0 1 3) (3 4) (0 1 3) (4 5) (0 1 3) (5 6) (0 1 3) (6 7) (0 1 3) (7 8) (0 1 3) (8 9) (0 1 3) (9 10) (0 1 3) (10 11) (0 1 3) (11 0) (0 1 3) (0 1) (0 1 3))
+: (((0 1 3) (0 1)) ((0 1 3) (1 2)) ((0 1 3) (2 3)) ((0 1 3) (3 4)) ((0 1 3) (4 5)) ((0 1 3) (5 6)) ((0 1 3) (6 7)) ((0 1 3) (7 8)) ((0 1 3) (8 9)) ((0 1 3) (9 10)) ((0 1 3) (10 11)) ((0 1 3) (11 0)) ((0 1 3) (0 1)))
 
 ** pc-compari performs some pitch-class mod12 interval arithmetic
 *** cl
@@ -1185,10 +1282,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
 *** clj									:clj:
- #+BEGIN_SRC clojure :session cl-to-cloj
-(defn create-lewin-vector [set1 set2]
-  (counting (flatten (rec-do-pc-compari set1 set2))))
- #+END_SRC
+
 
  #+RESULTS:
  : #'post_tonal_overtone.core/create-lewin-vector
@@ -1198,7 +1292,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+END_SRC
 
 #+RESULTS:
-| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
 ** [#B] create-straus-profile--only called by?
 *** cl
@@ -1220,6 +1314,7 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+END_SRC
 
 #+RESULTS:
+: #'post_tonal_overtone.core/create-straus-profile
 
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn create-straus-profile [set1 set2]
@@ -1296,19 +1391,19 @@ Yikes! Reversing this corrects the order but transposes the wrong chord.
 #+END_SRC
 
 #+RESULTS:
-| 0 | 0 | 1 |  2 |  3 | 11 |
-| 0 | 1 | 1 |  2 |  3 |  4 |
-| 1 | 2 | 2 |  3 |  4 |  5 |
-| 2 | 3 | 3 |  4 |  5 |  6 |
-| 3 | 4 | 4 |  5 |  6 |  7 |
-| 4 | 5 | 5 |  6 |  7 |  8 |
-| 5 | 6 | 6 |  7 |  8 |  9 |
-| 6 | 7 | 7 |  8 |  9 | 10 |
-| 7 | 8 | 8 |  9 | 10 | 11 |
-| 0 | 8 | 9 |  9 | 10 | 11 |
-| 0 | 1 | 9 | 10 | 10 | 11 |
-| 0 | 1 | 2 | 10 | 11 | 11 |
-| 0 | 0 | 1 |  2 |  3 | 11 |
+| 0 | 1 |  2 | 11 |
+| 0 | 1 |  2 |  3 |
+| 1 | 2 |  3 |  4 |
+| 2 | 3 |  4 |  5 |
+| 3 | 4 |  5 |  6 |
+| 4 | 5 |  6 |  7 |
+| 5 | 6 |  7 |  8 |
+| 6 | 7 |  8 |  9 |
+| 7 | 8 |  9 | 10 |
+| 8 | 9 | 10 | 11 |
+| 0 | 9 | 10 | 11 |
+| 0 | 1 | 10 | 11 |
+| 0 | 1 |  2 | 11 |
 
 ** [#B] create-12-lewin-vectors--goes uncalled?
  #+BEGIN_SRC lisp :session cl-to-cloj
@@ -1654,6 +1749,19 @@ Why does this add a zero?
 #+RESULTS:
 | 5 | 6 | 8 | 0 | 1 |
 *** clj									:clj:
+Needed earlier--as in, below
+#+BEGIN_SRC clojure :session cl-to-cloj
+(defn positions
+  [pred coll]
+  (keep-indexed (fn [idx x]
+                  (when (pred x)
+                    idx))
+                coll))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/positions
+
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn find-prime-form-from-list [ordered-pcset]
   (let [a (all-rotations ordered-pcset)
@@ -1701,6 +1809,9 @@ Why does this add a zero?
                    (- (+ 12 x) n)))
          ordered-pcset)))
 #+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/set-to-zero
 
 #+BEGIN_SRC clojure :session cl-to-cloj
 (set-to-zero '(1 2 3 5))
@@ -2082,12 +2193,12 @@ with a whole list of lists for a reason?
 #+END_SRC
 
 #+RESULTS:
-| ((0 1) (0 1 3))   | ((0 1) (1 2 4))  |
-| ((0 1) (2 3 5))   | ((0 1) (3 4 6))  |
-| ((0 1) (4 5 7))   | ((0 1) (5 6 8))  |
-| ((0 1) (6 7 9))   | ((0 1) (7 8 10)) |
-| ((0 1) (8 9 11))  | ((0 1) (9 10 0)) |
-| ((0 1) (10 11 1)) | ((0 1) (11 0 2)) |
+| ((0 1) (0 1 2))   | ((0 1) (1 2 3))   |
+| ((0 1) (2 3 4))   | ((0 1) (3 4 5))   |
+| ((0 1) (4 5 6))   | ((0 1) (5 6 7))   |
+| ((0 1) (6 7 8))   | ((0 1) (7 8 9))   |
+| ((0 1) (8 9 10))  | ((0 1) (9 10 11)) |
+| ((0 1) (10 11 0)) | ((0 1) (11 0 1))  |
 *** a2--fine nesting
 #+BEGIN_SRC clojure :session cl-to-cloj
 (let [paired-list (list '(0 1) '(0 1 2))]
@@ -2334,7 +2445,7 @@ when using the sets that come from 024-026
 
 #+RESULTS:
 | 0 | 0 | 2 | 2 | 4 | 4 | 6 | 8 | 10 |
-**** 
+**** yikes--why do this to yourself?
 #+BEGIN_SRC lisp :session cl-to-cloj
 (let* ((paired-list (list '(0 2 4) '(0 2 6)))
        (output (locate (multiset-forte-primeA (car (mapcar #'clean-profile
@@ -2360,6 +2471,17 @@ when using the sets that come from 024-026
 
 *** clj
 #+BEGIN_SRC clojure :session cl-to-cloj
+(defn locate [x lat]
+  (concat (list x) (map inc (positions #(= % x) lat))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/locate
+
+#+BEGIN_SRC clojure
+
+#+END_SRC
+#+BEGIN_SRC clojure :session cl-to-cloj
 (defn locating [mset-list]
   (let [chart (comparing mset-list)]
     (nth  mset-list (dec (second (locate (first chart) (second chart)))))))
@@ -2367,7 +2489,8 @@ when using the sets that come from 024-026
 
 #+RESULTS:
 : #'post_tonal_overtone.core/locating
-#+BEGIN_SRC clojure :session cl-to-cloj
+
+#+BEGIN_SRC clojure
 (locating '((0 0 2 4 6 8 8 10 10) (0 2 4 6 6 8 8 10 10) (0 2 4 4 6 6 8 8 10) (0 2 2 4 4 6 6 8 10) (0 0 2 2 4 4 6 8 10) (0 0 2 2 4 6 8 10 10)))
 #+END_SRC
 
@@ -2468,10 +2591,7 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 #+RESULTS:
 | 10 | 3 | 5 |
 **** code
-#+BEGIN_SRC clojure :session cl-to-cloj
-(defn locate [x lat]
-  (concat (list x) (map inc (positions #(= % x) lat))))
-#+END_SRC
+locate code moved up to =locating=
 
 #+RESULTS:
 : #'post_tonal_overtone.core/locate
@@ -2636,6 +2756,8 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 ** clj naive definition
 *** code
 #+BEGIN_SRC clojure :session cl-to-cloj
+;;; not working yet, paren problem or more?
+
 (defn imset-decision-maker [paired-list]
   (let (
 	 a (make-pairs-from-list 
@@ -2651,13 +2773,15 @@ http://stackoverflow.com/questions/8641305/find-index-of-an-element-matching-a-p
 	 h (locate f g)
 	 i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output--why this choice?
 	       collect (nth (1- idx) e)) ;locate is not zero-indexed; lookup in straus profile
-	 j (remove-duplicates i :test equal)
-    (if (<= (length j) 2)
-	(if (every <= (car j) (cadr j))
-	    (car j)
-	    (cadr j))
+	 j (remove-duplicates i :test equal) ;; is this step, and all the rest based on j, needed?
+    (if (<= (length i) 2)
+	(if (apply <= (interleave (first i) (second i))
+	    (first i)
+	    (second i))
 	(locating j))))
 #+END_SRC
+
+#+RESULTS:
 
 *** functioning up till f
 
@@ -2709,8 +2833,14 @@ f)
 | 0 | 2 | 4 | 6 | 8 | 10 |
 
 *** h--locate function
+    :LOGBOOK:
+    CLOCK: [2015-04-28 Tue 15:15]
+    :END:
 
+**** so reject this one
 #+BEGIN_SRC clojure :session cl-to-cloj
+;;; incomplete syntax
+
 (let [paired-list (list '(0 2 4) '(0 2 6))
       b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
       c (reverse b)
@@ -2720,12 +2850,198 @@ f)
       g (distinct f)
       h (locate f g)
       i (for [idx ]
-h)
+h)]
+#+END_SRC
+
+#+RESULTS:
+
+
+Appear to be missing a step here, between producing all the straus
+profile with "clean-profile" in step e, which then allows you to
+select a regular prime form from them in step f...
+
+...and then calling distinct (unnecessarily?) and locate.
+
+**** instead
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+;;; incomplete syntax
+
+(let [paired-list (list '(0 2 4) '(0 2 6))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (map #(distinct %) e)]
+g)
 #+END_SRC
 
 #+RESULTS:
 | 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 1 | 3 | 5 | 7 | 9 | 11 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
 
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 2 4) '(0 2 6))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (map #(distinct %) e)
+      h (locate f g)]
+h)
+#+END_SRC
+
+#+RESULTS:
+| (0 2 4 6 8 10) | 1 | 3 | 5 | 7 | 9 | 11 | 13 | 14 | 16 | 18 | 20 | 22 | 24 | 26 |
+
+*** i is for looping
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 2 4) '(0 2 6))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (map #(distinct %) e)
+      h (locate f g)
+      i (for [idx (rest h)]
+             (nth e (dec idx)))]
+i)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 0 | 2 | 2 | 4 | 6 | 8 | 10 | 10 |
+| 0 | 0 | 2 | 2 | 4 | 4 | 6 |  8 | 10 |
+| 0 | 2 | 2 | 4 | 4 | 6 | 6 |  8 | 10 |
+| 0 | 2 | 4 | 4 | 6 | 6 | 8 |  8 | 10 |
+| 0 | 2 | 4 | 6 | 6 | 8 | 8 | 10 | 10 |
+| 0 | 0 | 2 | 4 | 6 | 8 | 8 | 10 | 10 |
+| 0 | 0 | 2 | 2 | 4 | 6 | 8 | 10 | 10 |
+| 0 | 0 | 2 | 2 | 4 | 6 | 8 | 10 | 10 |
+| 0 | 0 | 2 | 4 | 6 | 8 | 8 | 10 | 10 |
+| 0 | 2 | 4 | 6 | 6 | 8 | 8 | 10 | 10 |
+| 0 | 2 | 4 | 4 | 6 | 6 | 8 |  8 | 10 |
+| 0 | 2 | 2 | 4 | 4 | 6 | 6 |  8 | 10 |
+| 0 | 0 | 2 | 2 | 4 | 4 | 6 |  8 | 10 |
+| 0 | 0 | 2 | 2 | 4 | 6 | 8 | 10 | 10 |
+
+*** j is removing-duplicates
+This step seems somewhat silly or odd depending on what sets you are
+working with
+
+#+BEGIN_SRC clojure :session cl-to-cloj
+(let [paired-list (list '(0 2 4) '(0 2 6))
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (map #(distinct %) e)
+      h (locate f g)
+      i (for [idx (rest h)]
+             (nth e (dec idx)))
+      j (map #(distinct %) i)]
+j)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+| 0 | 2 | 4 | 6 | 8 | 10 |
+
+*** the final conditional--fixed and with a redundant step?
+
+#+COMMENT naive code, NOT clojure
+#+BEGIN_SRC clojure :session cl-to-cloj
+;;; not working yet, paren problem or more?
+;;;
+(defn imset-decision-maker [paired-list]
+  (let [
+	 a (make-pairs-from-list 
+	     (set-up-Tn-equivalent-Ys-with-X (first paired-list) 
+					     (second paired-list))))
+	 b (map createA-lewin-vector a)
+	 c (map reverse b)
+	 d (append b c)
+	 e (map clean-profile d) ; turns out CLEAN-PROFILE effectively creates a Straus-profile
+	 f (multiset-forte-primeA (car e)) ; car because only need check the first one as they
+					; all will represent the same forteprime (why, again?)
+	 g (map remove-duplicates e)
+	 h (locate f g)
+	 i (loop for idx in (cdr h) ; must use cdr portion of LOCATE output--why this choice?
+	       collect (nth (1- idx) e)) ;locate is not zero-indexed; lookup in straus profile
+	 j (remove-duplicates i :test equal) ;; is this step, and all the rest based on j, needed?
+    (if (<= (length i) 2)
+	(if (apply <= (interleave (first i) (second i)))
+	    (first i)
+	    (second i))
+	(locating i)))
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC clojure
+(defn testim-z [x y] "test with sets x and y up to the final decision" 
+(let [paired-list (list x y)
+      b (map createA-lewin-vector (set-up-Tn-equivalent-Ys-with-X (first paired-list) (second paired-list)))
+      c (reverse b)
+      d (concat b c)
+      e (map clean-profile d)
+      f (multiset-forte-primeA (first e))
+      g (map #(distinct %) e)
+      h (locate f g)
+      i (for [idx (rest h)]
+             (nth e (dec idx)))
+      j (map #(distinct %) i)]
+  (if (<= (count i) 2)
+    (if (apply <= (interleave (first i) (second i)))
+      (first i)
+      (second i))
+    (locating i))))
+#+END_SRC
+
+#+RESULTS:
+: #'post_tonal_overtone.core/testim-z
+
+)
 * calling cl imset in various stages
 ** use '(0 1) '(0 2) to break down each step of a sequence
 the whole ~j~ step diversion must be due to special situations that
@@ -2781,7 +3097,7 @@ need to be documented. The proverbial corner cases...
 
 #+RESULTS:
 : T
-
+*** 
 *** length test after j
 
  length is less than or equal to 2, means what? In all likelihood that

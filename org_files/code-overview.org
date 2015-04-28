@@ -927,6 +927,7 @@ NIL
   (embed-orzo-sums-with-straus-profiles '(0 1 3) '(0 1 4)) #'< :key
   #'car))))
 * pdf walk through of steps for given sets
+** 013-0134
 0. "imset-decision-maker" is the name of the program; it is being
 invoked on the paired list of (013) and (0134) (CL-USER is the user
 prompt, my interface with the engine that is the computer language,
@@ -1068,10 +1069,13 @@ only two unique multiset parents; this is not always the case, as in
 the next example
 (0 1 2 3 3 3 4 4 5 6 6 7)
 (0 1 1 2 3 3 4 4 4 5 6 7)
+
+#+COMMENT More documentation of this step!
 7. choose the best multiset from above, a process that can be a little
 tricky; see next example
 (0 1 1 2 3 3 4 4 4 5 6 7)
 ---------------------------------------------------------------------
+** 036-0134
 Here's the version of the same process from above, but now with two
 symmetrical sets, (036) and (0134)
 0.
