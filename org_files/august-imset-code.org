@@ -389,3 +389,4 @@ conjoining every two elements"
 ;; if so, this will print it out
 ;; (format t "~{~{~a~%~}~%~}" *ordered-im-redux*)
 #+END_SRC
+* clojure
