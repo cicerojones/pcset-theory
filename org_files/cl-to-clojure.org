@@ -2834,7 +2834,7 @@ f)
 
 *** h--locate function
     :LOGBOOK:
-    CLOCK: [2015-04-28 Tue 15:15]
+    CLOCK: [2015-04-28 Tue 15:15]--[2015-04-28 Tue 18:04] =>  2:49
     :END:
 
 **** so reject this one
