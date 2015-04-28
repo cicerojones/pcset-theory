@@ -14,6 +14,12 @@ Ultimately, an interactive front-end, probably to be used via PWGL or
 a similar graphical environment, allowing the user to hear and explore
 the relationships would be ideal.
 
+## Update
+There is now (<2015-04-28 Tue>) a new direction to this project, which
+was originally written entirely in Common Lisp. Take a look at the
+.org files for the most recent modifications and development.
+
+
 ## General Explanation
 A suite of functions for dealing with a new, relatively-esoteric
 concept in the relatively esoteric world of post-tonal music
