@@ -1,6 +1,5 @@
-* 
-** 
-** 
+* document full ifunc process in clojure?
+** list+ (adds its first integer arg to each member of the second
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn list+ [n lst]
   (map (fn [x] (+ n x)) lst))
@@ -16,7 +15,7 @@
 #+RESULTS:
 | 4 | 5 | 6 |
 
-** 
+** Tn1-11 (collect all 12 transpositions of arg)
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn Tn1-11 [pcset]
   (loop [n 12
@@ -51,21 +50,26 @@
 | 11 | 15 | 18 |
 | 12 | 16 | 19 |
 
-** 
+** mod12 (reduce each member of arg to its mod12 equivalent)
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn mod12 [lst]
-(map #(mod % 12) lst))
+  (map #(mod % 12) lst))
+#+END_SRC
 
+#+RESULTS:
+: #'user/mod12
+
+#+BEGIN_SRC clojure
 (mod12 [24 28 31])
 #+END_SRC
 
 #+RESULTS:
-: #'user/mod12(0 4 7)
+| 0 | 4 | 7 |
 
-** 
+** mod12-all (map mod12 across sets in arg) 
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn mod12-all [lst-of-lsts]
-(map mod12 lst-of-lsts))
+  (map mod12 lst-of-lsts))
 
 
 #+END_SRC
@@ -82,7 +86,7 @@
 | 0 | 4 | 7 |
 | 0 | 4 | 7 |
 
-** 
+** TnI-all (map mod12-all across all 12 transpositions of each given set) 
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn TnI-all [lol-of-pcsets]
 (map #(mod12-all (Tn1-11 %)) lol-of-pcsets))
@@ -105,13 +109,21 @@
  #+BEGIN_SRC clojure :session cl-to-cloj :results output
 (println (frequencies [3 1 2 0 2 4 0 0 0 0 0 0]))
  #+END_SRC
+
+ #+RESULTS:
+ : {3 1, 1 1, 2 2, 0 7, 4 1}
+
 *** 
  #+BEGIN_SRC clojure :session cl-to-cloj
 (let [v [3 1 2 0 2 4 0 0 0 0 0 0]]
-                            (for [n (range 12)]
-                              (get (frequencies v ) n 0)))
+  (for [n (range 12)]
+    (get (frequencies v ) n 0)))
  #+END_SRC
-** 
+
+ #+RESULTS:
+ | 7 | 1 | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+** counting (count number of occurrences of each value in argument)
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn counting [v]
   (for [n (range 12)]
@@ -124,15 +136,21 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (counting '(3 1 2 0 2 4 0 0 0 0 0 0))
 #+END_SRC
+
+#+RESULTS:
+| 7 | 1 | 2 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
 *** 
  #+BEGIN_SRC clojure :session cl-to-cloj
 (repeat 4 6)
  #+END_SRC
-** 
+** pc-compari
 #+BEGIN_SRC clojure :session cl-to-cloj
+;; yikes--times out for case where n1 is greater than n2??
 (defn pc-compari [n1 n2]
-  (cond (<= n1 n2) (cond (= n1 n2) 0
-                         :else (inc (pc-compari n1 (dec n2))))
+  (cond (<= n1 n2)
+        (cond (= n1 n2) 0
+              :else (inc (pc-compari n1 (dec n2))))
         :else (cond (= (mod n1 12) n2) 0
                     :else (inc (pc-compari (inc n1) n2)))))
 #+END_SRC
@@ -144,13 +162,24 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (pc-compari 0 12)
 #+END_SRC
-** 
+
+#+RESULTS:
+: 12
+
+#+BEGIN_SRC clojure
+(pc-compari 1 12)
+#+END_SRC
+
+#+RESULTS:
+: 11
+
+** rec-do-pc-compair (produce a vectors deriving from pc-math on members of two sets
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn rec-do-pc-compari [lst1 lst2]
   (letfn [(rec [l1 l2]
-                   (cond (empty? l1) ()
-                         :else (cons (pc-compari (first l1) (first l2))
-                                     (rec (rest l1) l2))))]
+            (cond (empty? l1) ()
+                  :else (cons (pc-compari (first l1) (first l2))
+                              (rec (rest l1) l2))))]
     (cond (empty? lst2) ()
           :else (cons (rec lst1 lst2)
                       (rec-do-pc-compari lst1 (rest lst2))))))
@@ -164,7 +193,13 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (rec-do-pc-compari '(0 1 2) '(0 1 3))
 #+END_SRC
-** 
+
+#+RESULTS:
+| 0 | 11 | 10 |
+| 1 |  0 | 11 |
+| 3 |  2 |  1 |
+
+** create-lewin-vector
  #+BEGIN_SRC clojure :session cl-to-cloj
 (defn create-lewin-vector [set1 set2]
   (counting (flatten (rec-do-pc-compari set1 set2))))
@@ -207,7 +242,7 @@
 	  (repeat (nth v n) n))))
  #+END_SRC
 
-** 
+** clean-profile
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn clean-profile [single-vector]
   (flatten (for [n (range 12)]
@@ -220,11 +255,19 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (clean-profile '(0 1 1 2 3 3 3 5 7 0 10 11))
 #+END_SRC
-*** 
+
+#+RESULTS:
+| 1 | 2 | 3 | 3 | 4 | 4 | 4 | 5 | 5 | 5 | 6 | 6 | 6 | 7 | 7 | 7 | 7 | 7 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 10 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 | 11 |
+
+*** use of concat demonstrates a failure to understand it
  #+BEGIN_SRC clojure :results output
 (println (concat '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7))))))
  #+END_SRC
-** 
+
+ #+RESULTS:
+ : ((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7))))
+
+** de-nestc
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn de-nestc [x]
   (letfn [(denester [inner-x acc]
@@ -242,8 +285,34 @@
 : #'user/de-nestc
 
 #+BEGIN_SRC clojure
-(de-nestc '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7)))))
+(de-nestc '((0 1)
+            ((0 3)
+             (0 4)
+             ((0 4 5)
+              (0 4 6)))
+            (((0 1 2 4)
+              (0 1 3 5))
+             ((0 1 4 6)
+              (0 2 5 7)))))
 #+END_SRC
+
+#+RESULTS:
+| 0 | 1 |   |   |
+| 0 | 3 |   |   |
+| 0 | 4 |   |   |
+| 0 | 4 | 5 |   |
+| 0 | 4 | 6 |   |
+| 0 | 1 | 2 | 4 |
+| 0 | 1 | 3 | 5 |
+| 0 | 1 | 4 | 6 |
+| 0 | 2 | 5 | 7 |
+
+#+BEGIN_SRC clojure
+(apply concat '((0 1) ((0 3) (0 4) ((0 4 5) (0 4 6))) (((0 1 2 4) (0 1 3 5)) ((0 1 4 6) (0 2 5 7)))))
+#+END_SRC
+
+#+RESULTS:
+| 0 | 1 | (0 3) | (0 4) | ((0 4 5) (0 4 6)) | ((0 1 2 4) (0 1 3 5)) | ((0 1 4 6) (0 2 5 7)) |
 
 #+BEGIN_SRC clojure
 (de-nestc '(([24 25 28] [24 25 40] [24 25 52] [24 25 64]) ([24 37 28] [24 37 40] [24 37 52] [24 37 64]) ([24 49 28] [24 49 40] [24 49 52] [24 49 64]) ([24 61 28] [24 61 40] [24 61 52] [24 61 64])))
@@ -265,8 +334,7 @@
 (println (apply concat (first trip014)))
  #+END_SRC
 
-
-** 
+** set-up (create lists of X-Y comparisons
 #+BEGIN_SRC clojure
 (defn set-up [pcset1 lst-of-pcsets]
   (loop [pc1 pcset1
@@ -280,7 +348,7 @@
 #+END_SRC
 
 #+RESULTS:
-: #'user/set-up((0 1 2) (0 1 2 4 6) (0 1 2) (0 4) (0 1 2) (0 1 2))
+: #'user/set-up
 
 #+BEGIN_SRC clojure
 (set-up '(0 1 2) '((0 1 2) (0 4) (0 1 2 4 6)))
@@ -306,10 +374,10 @@
  | 6 | 7 |
  | 8 | 9 |
 
-** 
+** make-pairs-from-list (partition big lists of X-Y, X-Y', X-Y'' etc) 
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn make-pairs-from-list [lst]
-(partition 2 lst))
+  (partition 2 lst))
 
 
 #+END_SRC
@@ -360,7 +428,7 @@
  #+BEGIN_SRC clojure
 (last '((0 1)))
  #+END_SRC
-** 
+** help-make-pairs
 #+BEGIN_SRC clojure
 (defn help-make-pairs [[head & tail]]
 (letfn [(rec [inner-tail]
@@ -386,7 +454,7 @@
 | 0 | 3 |
 | 0 | 4 |
 
-** 
+** make-comb-pairs-from-flat-list (perform some combinatorial operations)
 #+BEGIN_SRC clojure
 (defn make-comb-pairs-from-flat-list [coll]
   (cond (empty? coll) ()
@@ -405,7 +473,7 @@
 (println (make-comb-pairs-from-flat-list [0 1 2 3 4 5]))
 #+END_SRC
 
-** 
+** prepare-set-up-Tn-equivalent-Ys-with-X
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn prepare-set-up-Tn-equivalent-Ys-with-X [pcset1 pcset2]
   (set-up pcset1 (first (TnI-all (list pcset2)))))
@@ -461,7 +529,7 @@
  #+BEGIN_SRC clojure :session cl-to-cloj :results output
 (println (set-up-Tn-equivalent-Ys-with-X  '(0 1 3) '(0 1)))
  #+END_SRC
-** 
+** set-up-Tn-equivalent-Ys-with-X
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn set-up-Tn-equivalent-Ys-with-X [pcset1 pcset2]
 (map reverse (partition 2 (prepare-set-up-tn-equivalent-Ys-with-X pcset1 pcset2))))
@@ -496,7 +564,7 @@
  #+RESULTS:
  : (((0 1) (0 1 3)) ((11 0) (0 1 3)) ((10 11) (0 1 3)) ((9 10) (0 1 3)) ((8 9) (0 1 3)) ((7 8) (0 1 3)) ((6 7) (0 1 3)) ((5 6) (0 1 3)) ((4 5) (0 1 3)) ((3 4) (0 1 3)) ((2 3) (0 1 3)) ((1 2) (0 1 3)) ((0 1) (0 1 3)))
 
-** 
+** createA-lewin-vector
  #+BEGIN_SRC clojure :session cl-to-cloj
 (defn createA-lewin-vector [[set1 set2]]
   (counting (flatten (rec-do-pc-compari set1 set2))))
@@ -553,7 +621,7 @@
  #+BEGIN_SRC clojure :session cl-to-cloj
 (overtone.core/rotate 1 [0 1 3 4])
  #+END_SRC
-** 
+** rotate (from where? overtone?)
 
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn rotate
@@ -604,12 +672,12 @@
     (into [] (take size s))))
  #+end_example
 
-** 
+** all-rotations
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn all-rotations [lst]
-(let [len (count lst)]
-(for [n (range len)]
-(rotate n lst))) )
+  (let [len (count lst)]
+    (for [n (range len)]
+      (rotate n lst)))
 #+END_SRC
 
 #+RESULTS:
@@ -625,7 +693,7 @@
 |  2 | 11 |  0 |  1 |
 | 11 |  0 |  1 |  2 |
 
-** 
+** primer (prepare prime form algorithm process?)
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn primer [ordered-set]
   (cond (empty? ordered-set) ()
@@ -639,7 +707,7 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (primer '(11 0 1 2))
 #+END_SRC
-** 
+** prime-vector
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn prime-vector [ordered-set]
   (let [basic-vector (primer ordered-set)]
@@ -656,7 +724,7 @@
  #+BEGIN_SRC clojure :session cl-to-cloj
 (Integer/parseInt (str 11 2 6 7))
  #+END_SRC
-** 
+** list-to-integer
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn list-to-integer [lst-of-ints] (Integer/parseInt (apply str lst-of-ints)))
 #+END_SRC
@@ -667,14 +735,18 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (list-to-integer '(11 2 6 7))
 #+END_SRC
-** 
+
+#+RESULTS:
+: 11267
+
+** positions (where did this come from?)
 #+BEGIN_SRC clojure :session cl-to-cloj
-(defn positions
-  [pred coll]
-  (keep-indexed (fn [idx x]
-                  (when (pred x)
-                    idx))
-                coll))
+(defn positions [pred coll]
+  (keep-indexed
+   (fn [idx x]
+     (when (pred x)
+       idx))
+   coll))
 #+END_SRC
 
 #+RESULTS:
@@ -691,7 +763,7 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (map inc (positions #(= % 10) '(0 100 10 1000 10 100000)))
 #+END_SRC
-** 
+** find-prime-form-from-list
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn find-prime-form-from-list [ordered-pcset]
   (let [a (all-rotations ordered-pcset)
@@ -707,7 +779,7 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (find-prime-form-from-list '(0 1 5 6 8))
 #+END_SRC
-** 
+** set-to-zero
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn set-to-zero [ordered-pcset]
   (let [n (first ordered-pcset)]
@@ -723,7 +795,7 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (set-to-zero '(1 2 3 5))
 #+END_SRC
-** 
+** invert-mod12-pcset
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn invert-mod12-pcset [pcset]
   (sort (mapcat mod12 (list (map #(- 12 %) pcset)))))
@@ -735,7 +807,11 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (invert-mod12-pcset '(0 3 7 10))
 #+END_SRC
-** 
+
+#+RESULTS:
+| 0 | 2 | 5 | 9 |
+
+** forte-decision
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn forte-decision [pcset]
   (let [a (set-to-zero (find-prime-form-from-list pcset))]
@@ -748,7 +824,7 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (map #'forte-decision '((0 1 5 6 8) (0 1 5 7 8) (0 2 3 6 7 9) (0 1 4 5 7 9) (0 1 3 5 8 9) (0 1 4 6 8 9) (0 1 2 5 6 7 9) (0 1 3 4 5 7 8 10)))
 #+END_SRC
-** 
+** another-forte
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn another-forte [setx sety]
   (let [a setx b sety]
@@ -766,7 +842,7 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (another-forte ' (0 1 3 7 8) ' (0 1 5 7 8))
 #+END_SRC
-** 
+** forte-primeA
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn forte-primeA [pcset]
   (let [a (forte-decision pcset)]
@@ -779,10 +855,10 @@
 #+BEGIN_SRC clojure :session cl-to-cloj
 (forte-primeA ' (0 1 5 7 8))
 #+END_SRC
-** 
+** multiset-forte-primeA
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn multiset-forte-primeA [mset]
-(forte-primeA (distinct mset)))
+  (forte-primeA (distinct mset)))
 #+END_SRC
 
 #+RESULTS:
@@ -828,7 +904,7 @@ e)
       f (multiset-forte-primeA (first e))]
 f)
  #+END_SRC
-** 
+** compairing
  #+BEGIN_SRC clojure :session cl-to-cloj
 (defn comparing [mset-list]
   (let [canon (map #(apply + %) mset-list)]
@@ -841,7 +917,7 @@ f)
 #+BEGIN_SRC clojure :session cl-to-cloj
 (comparing '((0 0 2 4 6 8 8 10 10) (0 2 4 6 6 8 8 10 10) (0 2 4 4 6 6 8 8 10) (0 2 2 4 4 6 6 8 10) (0 0 2 2 4 4 6 8 10) (0 0 2 2 4 6 8 10 10)))
 #+END_SRC
-** 
+** locate
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn locate [x lat]
   (concat (list x) (map inc (positions #(= % x) lat))))
@@ -857,7 +933,7 @@ f)
 #+RESULTS:
 | (0 1 3 4 6 7 9 10) | 1 | 4 | 7 | 10 | 14 | 17 | 20 | 23 |
 
-** 
+** locating
 #+BEGIN_SRC clojure :session cl-to-cloj
 (defn locating [mset-list]
   (let [chart (comparing mset-list)]
@@ -1032,7 +1108,7 @@ j)
 	    (second i))
 	(locating i)))
  #+END_SRC
-** 
+** testim-z
 #+BEGIN_SRC clojure
 (defn testim-z [x y] "test with sets x and y up to the final decision" 
 (let [paired-list (list x y)
