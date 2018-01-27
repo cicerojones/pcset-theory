@@ -1,0 +1,6 @@
+* Post-tonal music theory and you
+Various files, using Common Lisp and Clojure, to explore some particular ideas in the theory of post-tonal music.
+
+Specifically, the code here was developed in an effort to explore an obscure idea in the theory of pitch-class sets first described by David Lewin.
+
+Please see (my footnote in) Music Theory Online:  http://www.mtosmt.org/issues/mto.14.20.2/mto.14.20.2.straus.html#FN1
